@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
-
+import streamlit as st
 def demanded_plot(data, test_dict):
+
     test_plot = go.Figure()
     test_plot.add_trace	(go.Scattergl (  
                                 x       		= data[test_dict["Speed"]],
@@ -17,26 +18,26 @@ def demanded_plot(data, test_dict):
                                 )
     return test_plot
 
-def transient_removal(data, test_dict):
+def transient_removal_plot(transient_sample, Step_index, Stop_index, df, test_dict):
     transient_plot = go.Figure()
 
     transient_plot.add_trace(go.Scatter (  
                                         x       = transient_sample.index.values, 
-                                        y       = transient_sample["T_Demanded"], 
+                                        y       = transient_sample[test_dict["Torque Demanded"]], 
                                         name    = "Demanded Torque (Nm)",
                                         hovertemplate = '%{y:.2f} Nm'
                             )           )
 
     transient_plot.add_trace(go.Scatter (  
                                         x       = transient_sample.index.values, 
-                                        y       = transient_sample["T_Estimated"],
+                                        y       = transient_sample[test_dict["Torque Estimated"]],
                                         name    = "Estimated Torque (Nm)",
                                         hovertemplate = '%{y:.2f} Nm'
                             )           )
 
     transient_plot.add_trace(go.Scatter (  
                                         x       = transient_sample.index.values, 
-                                        y       = transient_sample["T_Measured"], 
+                                        y       = transient_sample[test_dict["Torque Measured"]], 
                                         name    = "Measured Torque (Nm)",
                                         hovertemplate = '%{y:.2f} Nm'
                             )           )
@@ -47,8 +48,8 @@ def transient_removal(data, test_dict):
                                     yaxis_title = 'Torque (Nm)'
                                     )
     transient_plot.add_annotation   (
-                                    x           = Step_index[3],
-                                    y           = df["T_Demanded"][Step_index[3]],
+                                    x           = Step_index[test_dict["Sample"]],
+                                    y           = df[test_dict["Torque Demanded"]][Step_index[test_dict["Sample"]]],
                                     xref        = "x",
                                     yref        = "y",
                                     text        = "Start of removal",
@@ -70,8 +71,8 @@ def transient_removal(data, test_dict):
                                     )
 
     transient_plot.add_annotation   (
-                                    x           = Stop_index[3],
-                                    y           = df["T_Demanded"][Stop_index[3]],
+                                    x           = Stop_index[test_dict["Sample"]],
+                                    y           = df[test_dict["Torque Demanded"]][Stop_index[test_dict["Sample"]]],
                                     xref        = "x",
                                     yref        = "y",
                                     text        = "End of removal",

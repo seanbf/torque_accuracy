@@ -20,14 +20,24 @@ def load_dataframe(uploaded_file):
 
 
 @st.cache
-def transient_removal(data, test_dict):
-    data["Step_Change"]   = '0'
-    data["Step_Change"]   = data["Torque Demanded"].diff()
+def determine_transients(data, test_dict):
+    data["Step_Change"] = '0'
+    data["Step_Change"] = data[test_dict["Torque Demanded"]].diff()
 
-    Step_index = ( data.index[data['Step_Change'] != 0] - 1 )
-    Stop_index = Step_index + test_dict["Dwell Period"]
+    Step_index          = ( data.index[data['Step_Change'] != 0] - 1 )
+    Stop_index          = Step_index + test_dict["Dwell Period"]
 
-    # Plot transient removal sample
-    transient_sample = data.iloc[Step_index[3]-250 : Stop_index[3]+250]
+    return Step_index, Stop_index
 
-    return Step_index, Stop_index, transient_sample
+def sample_transients(Step_index, Stop_index, data, test_dict):
+
+    transient_sample = data.iloc[Step_index[test_dict["Sample"]]-250 : Stop_index[test_dict["Sample"]]+250]
+    
+    return transient_sample
+
+def col_removal(data, list_to_keep):
+    selected_data = pd.DataFrame
+    selected_data = data.columns.intersection(list_to_keep)
+    data = data[selected_data]
+
+    return data

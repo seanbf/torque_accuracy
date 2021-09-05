@@ -171,30 +171,18 @@ def containers(analysis_toggle, columns):
             report_table["QM Limit Nm"]         = st.number_input("QM Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
             report_table["QM Limit Pc"]         = st.number_input("QM Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
 
-        elif analysis_toggle == "Estimated":
-            report_table["Estimated Limit Nm"]  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-            report_table["Estimated Limit %"]   = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-
-        elif analysis_toggle == "Output & Estimated":
+        else:
             report_table["QM Limit Nm"]         = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
             report_table["QM Limit Pc"]         = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
             report_table["Estimated Limit Nm"]  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
             report_table["Estimated Limit %"]   = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
     
     with st.sidebar.expander("Signals", expanded=True):
-        if analysis_toggle == "Output":
-            report_table["Torque Measured"]      = st.selectbox("Torque Measured",list(columns) )
-            report_table["Torque Demanded"]      = st.selectbox("Torque Demanded",list(columns) )
 
-        elif analysis_toggle == "Estimated":
-            report_table["Torque Measured"]     = st.selectbox("Torque Measured",list(columns) )
+        report_table["Torque Measured"]     = st.selectbox("Torque Measured",list(columns) )
+        report_table["Torque Demanded"]     = st.selectbox("Torque Demanded",list(columns) )
+        if analysis_toggle == "Output & Estimated":
             report_table["Torque Estimated"]    = st.selectbox("Torque Estimated",list(columns) )
-
-        elif analysis_toggle == "Output & Estimated":
-            report_table["Torque Measured"]     = st.selectbox("Torque Measured",list(columns) )
-            report_table["Torque Demanded"]     = st.selectbox("Torque Demanded",list(columns) )
-            report_table["Torque Estiamted"]    = st.selectbox("Torque Estimated",list(columns) )
-
         report_table["DC Voltage"]              = st.selectbox("DC Voltage",list(columns) )
         report_table["DC Current"]              = st.selectbox("DC Current",list(columns) )
         report_table["Speed"]                   = st.selectbox("Speed",list(columns) )
