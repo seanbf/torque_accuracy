@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-#from src.layout import sidebar_md
+from src.layout import containers
 from src.utils import load_dataframe
+from src.plotter import demanded_plot
 
 page_config = st.set_page_config(
                                 page_title              ="Torque Accuracy Tool", 
@@ -10,26 +11,8 @@ page_config = st.set_page_config(
                                 initial_sidebar_state   ='auto'
                                 )
 
-def sidebar_md():
-    sidebar_config =     """
-    <style>
-    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-        width: 600px;
-    }
-    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-        width: 600px;
-        margin-left: -600px;
-    }   
-    </style>
-    """
-    return sidebar_config
-
 st.sidebar.title('Torque Accuracy Tool')
 st.sidebar.markdown('''<small>v0.1</small>''', unsafe_allow_html=True)
-
-#Set up sidebar.
-sidebar_config = sidebar_md()
-st.markdown(sidebar_config, unsafe_allow_html=True)
 
 #Ask for file upload and read.
 uploaded_file = st.sidebar.file_uploader(   
@@ -48,45 +31,40 @@ elif uploaded_file is not None:
 
     dataframe, columns  = load_dataframe(uploaded_file=uploaded_file)
 
-torque_analysis = st.sidebar.radio("Torque Analysis", ["Output", "Estimated", "Output & Estimated"], key = "torque_analysis")
+    columns             = list(columns)
 
-with st.sidebar.expander("Report", expanded=False):
-    report_name             = st.text_input("Test Name")
+    columns.insert(0, "Not Selected")
 
-with st.sidebar.expander("Test Limits", expanded=True):
-    if torque_analysis == "Output":
-        output_limit_nm     = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        output_limit_pc     = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+plot_test_data = st.sidebar.checkbox("Plot Test Data", value = True)
+transient_removal = st.sidebar.checkbox("Remove Transients from Data", value = True)
+analysis_toggle = st.sidebar.radio("Torque Analysis", ["Output", "Estimated", "Output & Estimated"], key = "torque_analysis")
 
-    elif torque_analysis == "Estimated":
-        estimated_limit_nm  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_pc  = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+test_dict = containers(analysis_toggle, columns)
 
-    elif torque_analysis == "Output & Estimated":
-        output_limit_nm     = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        output_limit_pc     = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_nm  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_pc  = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+if any(value == 'Not Selected' for value in test_dict.values()) == True:
+    st.info("Please select symbols in the sidebar")
+    st.stop()
 
-with st.sidebar.expander("Signals", expanded=True):
-    if torque_analysis == "Output":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_demanded     = st.selectbox("Torque Demanded",list(columns) )
+l_func = lambda x, y: list((set(x)- set(y))) + list((set(y)- set(x))) 
 
-    elif torque_analysis == "Estimated":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_estimated    = st.selectbox("Torque Estimated",list(columns) )
+non_match = l_func(columns, test_dict.values())
 
-    elif torque_analysis == "Output & Estimated":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_demanded     = st.selectbox("Torque Demanded",list(columns) )
-        torque_estimated    = st.selectbox("Torque Estimated",list(columns) )
-    
-    dc_voltage              = st.selectbox("DC Voltage",list(columns) )
-    dc_current              = st.selectbox("DC Current",list(columns) )
-    speed                   = st.selectbox("Speed",list(columns) )
-    #id                      = st.selectbox("Id",list(columns) )
-    #iq                      = st.selectbox("Iq",list(columns) )
-    #id                      = st.selectbox("Ud",list(columns) )
-    #iq                      = st.selectbox("Uq",list(columns) )
+dataframe = dataframe.drop(columns=[col for col in dataframe if col not in non_match])
 
+st.write(dataframe.head())
+
+report_table = pd.DataFrame([test_dict])
+report_table = report_table.astype(str)
+report_table = report_table.T
+
+if (plot_test_data == True):
+    with st.expander("Test Demanded", expanded = True):
+        with st.spinner("Generating Demanded Test Point Plot"):
+            st.plotly_chart(demanded_plot(dataframe, test_dict))
+
+if transient_removal == True:
+    with st.expander("Transient Removal", expanded=True):
+        st.write("Make sure the transient removal process is removing the required data; when there is a step change and time taken until steady state is reached.")
+        st.write("If this is not achieved, adjust the variable dwell using the slider")
+        st.slider("Dwell Period", min_value=0, max_value=5000, step=1, value= 500)  
+        st.plotly_chart()
