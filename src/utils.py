@@ -19,7 +19,7 @@ def load_dataframe(uploaded_file):
 #    for column in data.column()
 
 
-@st.cache
+
 def determine_transients(data, test_dict):
     data["Step_Change"] = '0'
     data["Step_Change"] = data[test_dict["Torque Demanded"]].diff()

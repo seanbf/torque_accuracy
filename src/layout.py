@@ -1,9 +1,7 @@
 import streamlit as st
 import getpass
 
-def containers(analysis_toggle, columns):
-
-    report_table = dict()
+def test_details():
 
     controller_manfactures = [
         "Turntide",
@@ -111,84 +109,97 @@ def containers(analysis_toggle, columns):
         test_name, user, date               = st.columns(3)
 
         #Report Details
-        report_table["Test Name"]           = test_name.text_input("Test Name", key = "test_name")
-        report_table["User Name"]           = user.text_input("User", value = getpass.getuser())
-        report_table["Test Date"]           = date.date_input("Date", key = "test_date")
-        report_table["Test Notes"]          = st.text_area("Test Notes", key = "test_note")
+        test_name.text_input("Test Name", key = "Test Name")
+        user.text_input("User", value = getpass.getuser(), key = "User")
+        date.date_input("Date", key = "Test Date")
+        st.text_area("Test Notes", key = "Test Note")
 
         dyno_fields, software_fields            = st.columns(2)
 
         #Dyno
         dyno_fields.subheader("Dyno")
-        report_table["Dyno"]                    = dyno_fields.selectbox("Dyno", dynos, key = "dyno")
-        report_table["Torque Speed Sensor"]     = dyno_fields.selectbox("Torque Speed Sensor",torque_speed_sensors, key = "torque_speed_sensor")
-        report_table["Sensor Calibration Date"] = dyno_fields.date_input("Date", key = "sensor_calibration_date")
+        dyno_fields.selectbox("Dyno", dynos, key = "Dyno")
+        dyno_fields.selectbox("Torque Speed Sensor",torque_speed_sensors, key = "Torque Speed Sensor")
+        dyno_fields.date_input("Date", key = "Sensor Calibration Date")
 
         #Software
         software_fields.subheader("Software")
-        report_table["Software Level"]      = software_fields.selectbox("Level", sw_levels, key = "software_level")
-        report_table["Software Location"]   = software_fields.text_input("Location", key = "software_location")
-        report_table["Software Notes"]      = software_fields.text_area("Notes", key = "software_note")
+        software_fields.selectbox("Level", sw_levels, key = "Software Level")
+        software_fields.text_input("Location", key = "Software Location")
+        software_fields.text_area("Notes", key = "Software Notes")
 
         controller_field, motor_field   = st.columns(2)
 
         #Controllers
         controller_field.subheader("Controller")
-        report_table["Controller Manufacturer"] = controller_field.selectbox("Manufacturer", controller_manfactures, key = "controller_manufacturer")
+        controller_field.selectbox("Manufacturer", controller_manfactures, key = "Controller Manufacturer")
 
-        if report_table["Controller Manufacturer"] == 'Turntide':
-            report_table["Controller Model"] = controller_field.selectbox("Model", turntide_controllers, key = "controller_model")
-        elif report_table["Controller Manufacturer"] == 'Avid':
-            report_table["Controller Model"] = controller_field.selectbox("Model", avid_controllers, key = "controller_model")
-        elif report_table["Controller Manufacturer"] == 'Borgwarner':
-            report_table["Controller Model"] = controller_field.selectbox("Model", borgwarner_controllers, key = "controller_model")
-        elif report_table["Controller Manufacturer"] == 'Cascadia':
-            report_table["Controller Model"] = controller_field.selectbox("Model", cascadia_controllers, key = "controller_model")
-        elif report_table["Controller Manufacturer"] == 'Other':
-            report_table["Controller Model"] = controller_field.text_input("Model")
+        if st.session_state["Controller Manufacturer"] == 'Turntide':
+            controller_field.selectbox("Model", turntide_controllers, key = "Controller Model")
 
-        report_table["Controller Sample"] = controller_field.selectbox("Sample", samples, key = "controller_sample")
-        report_table["Controller Notes"] = controller_field.text_area("Notes", key = "controller_note")
+        elif st.session_state["Controller Manufacturer"] == 'Avid':
+            controller_field.selectbox("Model", avid_controllers, key = "Controller Model")
+
+        elif st.session_state["Controller Manufacturer"] == 'Borgwarner':
+            controller_field.selectbox("Model", borgwarner_controllers, key = "Controller Model")
+
+        elif st.session_state["Controller Manufacturer"] == 'Cascadia':
+            controller_field.selectbox("Model", cascadia_controllers, key = "Controller Model")
+
+        elif st.session_state["Controller Manufacturer"] == 'Other':
+            controller_field.text_input("Model")
+
+        controller_field.selectbox("Sample", samples, key = "Controller Sample")
+        controller_field.text_area("Notes", key = "Controller Notes")
 
         #Motors
         motor_field.subheader("Motor")
-        report_table["Motor Manufacturer"] = motor_field.selectbox("Manufacturer", motor_manufactures, key = "motor_manufacturer")
+        motor_field.selectbox("Manufacturer", motor_manufactures, key = "Motor Manufacturer")
 
-        if report_table["Motor Manufacturer"] == 'Turntide':
-            report_table["Motor Model"] = motor_field.selectbox("Model", turntide_motors, key = "motor_model")
-        elif report_table["Motor Manufacturer"] == 'Yasa':
-            report_table["Motor Model"] = motor_field.selectbox("Model", yasa_motors, key = "motor_model")
-        elif report_table["Motor Manufacturer"] == 'Intergral Powertrain':
-            report_table["Motor Model"] = motor_field.selectbox("Model", ipt_motors, key = "motor_model")
-        elif report_table["Motor Manufacturer"] == 'Other':
-            report_table["Motor Model"] = motor_field.text_input("Model")
+        if st.session_state["Motor Manufacturer"] == 'Turntide':
+            motor_field.selectbox("Model", turntide_motors, key = "Motor Model")
 
-        report_table["Motor Sample"] = motor_field.selectbox("Sample", samples, key = "motor_sample")
-        report_table["Motor Notes"] = motor_field.text_area("Notes", key = "motor_note")
+        elif st.session_state["Motor Manufacturer"] == 'Yasa':
+            motor_field.selectbox("Model", yasa_motors, key = "Motor Model")
 
-    with st.sidebar.expander("Test Limits", expanded=True):
-        if analysis_toggle == "Output":
-            report_table["QM Limit Nm"]         = st.number_input("QM Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-            report_table["QM Limit Pc"]         = st.number_input("QM Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+        elif st.session_state["Motor Manufacturer"] == 'Intergral Powertrain':
+            motor_field.selectbox("Model", ipt_motors, key = "Motor Model")
 
-        else:
-            report_table["QM Limit Nm"]         = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-            report_table["QM Limit Pc"]         = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-            report_table["Estimated Limit Nm"]  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-            report_table["Estimated Limit %"]   = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+        elif st.session_state["Motor Manufacturer"] == 'Other':
+            motor_field.text_input("Model")
+
+        motor_field.selectbox("Sample", samples, key = "Motor Sample")
+        motor_field.text_area("Notes", key = "Motor Notes")
+
+    return
+
+
+def limits(analysis_toggle):
+
+    if analysis_toggle == "Output":
+        st.number_input("QM Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
+        st.number_input("QM Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
+
+    else:
+        st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
+        st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
+        st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estiamted Limit [Nm]")
+        st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [Nm]")
+    return
+
+def signals(analysis_toggle, columns):
+
+    st.selectbox("Speed",list(columns), key = "Speed")
+    st.selectbox("Torque Measured",list(columns), key = "Torque Measured" )
+    st.selectbox("Torque Demanded",list(columns), key = "Torque Demanded" )
+    if analysis_toggle == "Output & Estimated":
+        st.selectbox("Torque Estimated",list(columns) , key = "Torque Estimated")
+    st.selectbox("DC Voltage",list(columns), key = "DC Voltage" )
+    st.selectbox("DC Current",list(columns), key = "DC Current" )
     
-    with st.sidebar.expander("Signals", expanded=True):
-
-        report_table["Torque Measured"]     = st.selectbox("Torque Measured",list(columns) )
-        report_table["Torque Demanded"]     = st.selectbox("Torque Demanded",list(columns) )
-        if analysis_toggle == "Output & Estimated":
-            report_table["Torque Estimated"]    = st.selectbox("Torque Estimated",list(columns) )
-        report_table["DC Voltage"]              = st.selectbox("DC Voltage",list(columns) )
-        report_table["DC Current"]              = st.selectbox("DC Current",list(columns) )
-        report_table["Speed"]                   = st.selectbox("Speed",list(columns) )
+    return
+        
         #report_table["id"]                      = st.selectbox("Id",list(columns) )
         #report_table["iq"]                      = st.selectbox("Iq",list(columns) )
         #report_table["id"]                      = st.selectbox("Ud",list(columns) )
         #report_table["iq"]                      = st.selectbox("Uq",list(columns) )
-
-    return report_table
