@@ -177,29 +177,124 @@ def test_details():
 def limits(analysis_toggle):
 
     if analysis_toggle == "Output":
+        st.subheader("Output Limits")
         st.number_input("QM Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
         st.number_input("QM Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
 
     else:
-        st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
-        st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
-        st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estiamted Limit [Nm]")
-        st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [Nm]")
+        col_output, col_estimated = st.columns(2)
+        col_output.subheader("Output Limits")
+        col_output.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
+        col_output.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
+        col_estimated.subheader("Estimated Limits")
+        col_estimated.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [Nm]")
+        col_estimated.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [%]")
     return
 
-def signals(analysis_toggle, columns):
+def signals(analysis_toggle, columns, t_demanded, t_estimated, t_measured, speed, vdc, idc):
 
-    st.selectbox("Speed",list(columns), key = "Speed")
-    st.selectbox("Torque Measured",list(columns), key = "Torque Measured" )
-    st.selectbox("Torque Demanded",list(columns), key = "Torque Demanded" )
+    torque_measured_signals = [
+        "Transducer_Torque_IOP",
+        "Transducer_Torque_MCP",
+        "Transducer_Trq_IOP",
+        "Transducer_Trq_MCP"
+    ]
+
+    speed_signals = [
+        "Transducer_Speed_IOP",
+        "Transducer_Speed_MCP",
+        "tesInputData.L2mPosSpdArb_RotorSpd_MCP",
+        "tesInputData.L2mPosSpdArb_RotorSpd_IOP"
+    ]
+
+    torque_demanded_signals = [
+        " TesOp_B.L2m_TarTrq_MCP",
+        "TesOp_B.L2m_TarTrq_MCP",
+        " TesOp_B.L2m_TarTrq_IOP",
+        "TesOp_B.L2m_TarTrq_IOP"
+    ]
+
+    torque_estimated_signals = [
+        " tesOutputData.L2mTes_EstTrq.val_MCP",
+        "tesOutputData.L2mTes_EstTrq.val_MCP",
+        " tesOutputData.L2mTes_EstTrq.val_IOP",
+        "tesOutputData.L2mTes_EstTrq.val_IOP"
+    ]
+
+    dc_voltage_signals = [
+        " sensvdcOutputData.L2mSensVdc_Vdc.val_MCP",
+        "sensvdcOutputData.L2mSensVdc_Vdc.val_MCP",
+        " sensvdcOutputData.L2mSensVdc_Vdc.val_IOP",
+        "sensvdcOutputData.L2mSensVdc_Vdc.val_IOP"
+    ]
+
+    dc_current_signals = [
+        " sensidcOutputData.L2mSensIdc_Idc.val_MCP",
+        "sensidcOutputData.L2mSensIdc_Idc.val_MCP",
+        " sensidcOutputData.L2mSensIdc_Idc.val_IOP",
+        "sensidcOutputData.L2mSensIdc_Idc.val_IOP"
+    ]
+
+
+    # Torque measured auto-select
+    for signals in torque_measured_signals:
+        if signals in columns:
+            list_index = list(columns).index(signals)
+            st.selectbox("Torque Measured",list(columns),  key = t_measured, index=list_index)
+            break
+        elif signals not in columns: 
+            st.selectbox("Torque Measured",list(columns),  key = t_measured, index = 0)
+            break
+
+    # Torque demanded auto-select
+    for signals in torque_demanded_signals:
+        if signals in columns:
+            list_index = list(columns).index(signals)
+            st.selectbox("Torque Demanded",list(columns), key = t_demanded, index=list_index)
+            break
+        else: 
+            st.selectbox("Torque Demanded",list(columns), key = t_demanded )
+            break
+
     if analysis_toggle == "Output & Estimated":
-        st.selectbox("Torque Estimated",list(columns) , key = "Torque Estimated")
-    st.selectbox("DC Voltage",list(columns), key = "DC Voltage" )
-    st.selectbox("DC Current",list(columns), key = "DC Current" )
+            # Torque estimated auto-select
+        for signals in torque_estimated_signals:
+            if signals in columns:
+                list_index = list(columns).index(signals)
+                st.selectbox("Torque Estimated",list(columns), key = t_estimated, index=list_index)
+                break
+            else: 
+                st.selectbox("Torque Estimated",list(columns), key = t_estimated)
+                break
+
+    # Speed auto-select
+    for signals in speed_signals:
+        if signals in columns:
+            list_index = list(columns).index(signals)
+            st.selectbox("Speed",list(columns), key = speed, index=list_index)
+            break
+        else: 
+            st.selectbox("Speed",list(columns), key = speed, index = 0)
+            break
+        
+    # DC Voltage auto-select
+    for signals in dc_voltage_signals:
+        if signals in columns:
+            list_index = list(columns).index(signals)
+            st.selectbox("DC Voltage",list(columns), key = vdc, index=list_index)
+            break
+        else: 
+            st.selectbox("DC Voltage",list(columns), key = vdc )
+            break
+
+    # DC Current auto-select
+    for signals in dc_current_signals:
+        if signals in columns:
+            list_index = list(columns).index(signals)
+            st.selectbox("DC Current",list(columns), key = idc, index=list_index)
+            break
+        else: 
+            st.selectbox("DC Current",list(columns), key = idc )
+            break
     
     return
-        
-        #report_table["id"]                      = st.selectbox("Id",list(columns) )
-        #report_table["iq"]                      = st.selectbox("Iq",list(columns) )
-        #report_table["id"]                      = st.selectbox("Ud",list(columns) )
-        #report_table["iq"]                      = st.selectbox("Uq",list(columns) )
