@@ -111,19 +111,14 @@ def sequential_color_dict():
                         })          
     return color_dict
 
-
-def plot_color_set(color_palaette, color_set, is_three_d):
+@st.cache
+def plot_color_set(color_palaette, color_set):
     """
     Plot color pallete as Bar chart for previewing.
     """
     
-    if is_three_d == True:
-        width           = 300
-    else:
-        width           = 800
-    
     n = len(color_palaette)
-    st.write(width)
+    
     fig = go.Figure (
                     data =  [go.Bar     (
                                         orientation = "v",
@@ -137,11 +132,12 @@ def plot_color_set(color_palaette, color_set, is_three_d):
                     layout = dict   (
                                     xaxis           = dict(showticklabels=False, showgrid=False, fixedrange = False, visible=False),
                                     yaxis           = dict(showticklabels=False, showgrid=False, fixedrange = False, visible=False),
-                                    height          = 80    ,
-                                    width           = width,
+                                    height          = 80,
+                                    width           = 200,
                                     margin          = dict(l=0,r=0,b=0,t=29),
                                     paper_bgcolor   = 'rgba(0,0,0,0)',
                                     plot_bgcolor    = 'rgba(0,0,0,0)'
                                     ),
                     )
+    fig = fig.to_image(format="png", width=200, height=60)
     return fig

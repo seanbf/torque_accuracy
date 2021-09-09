@@ -1,92 +1,350 @@
 import streamlit as st
 import pandas as pd
-#from src.layout import sidebar_md
-from src.utils import load_dataframe
+from src.layout import test_details, limits, signals, limit_format
+from src.utils import load_dataframe, col_removal, determine_transients, sample_transients, transient_removal, round_speeds, torque_error_calc, error_nm_analysis, error_pc_analysis, z_col_or_grid
+from src.plotter import demanded_plot, transient_removal_plot, plot_3D
+from src.colors import sequential_color_dict, diverging_color_dict, plot_color_set
 
 page_config = st.set_page_config(
                                 page_title              ="Torque Accuracy Tool", 
                                 page_icon               ="🎯", 
-                                layout                  ='wide', 
+                                #layout                  ='wide', 
                                 initial_sidebar_state   ='auto'
                                 )
 
-def sidebar_md():
-    sidebar_config =     """
-    <style>
-    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-        width: 600px;
-    }
-    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-        width: 600px;
-        margin-left: -600px;
-    }   
-    </style>
-    """
-    return sidebar_config
 
-st.sidebar.title('Torque Accuracy Tool')
-st.sidebar.markdown('''<small>v0.1</small>''', unsafe_allow_html=True)
+col_left, col_title, col_right = st.columns(3)
+col_title.title("Torque Accuracy Tool 🎯")
 
-#Set up sidebar.
-sidebar_config = sidebar_md()
-st.markdown(sidebar_config, unsafe_allow_html=True)
+st.write("The Torque Accuracy Tool will plot test data, remove transients and provide analysis on the accuracy of **Torque Output** against **Torque Measured**, in each or all operating quadrants, voltages and speeds.")
+st.write("The tool can also be used to achieve the same analysis with **Estimated Torque**.")
+st.write("As the tool uses averaging within the analysis, there is an option to remove transients from the data so only steady state data is analysed.")
 
+#strings used for readability
+t_demanded              = "Torque Demanded [Nm]"
+t_estimated             = "Torque Estimated [Nm]"
+t_measured              = "Torque Measured [Nm]"
+speed                   = "Speed [rpm]"
+speed_round             = "Speed [rpm] Rounded"
+vdc                     = "DC Voltage"
+idc                     = "DC Current"
+t_demanded_error_nm     = "Torque Demanded Error [Nm]"
+t_demanded_error_pc     = "Torque Demanded Error [%]"
+t_estimated_error_nm    = "Torque Estimated Error [Nm]"
+t_estimated_error_pc    = "Torque Estimated Error [%]"
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Upload file(s)")
 #Ask for file upload and read.
-uploaded_file = st.sidebar.file_uploader(   
+st.checkbox("Show first 10 rows of Data", key = "Sample Data")
+
+uploaded_file = st.file_uploader(   
                                         label="",
                                         accept_multiple_files=False,
                                         type=['csv', 'xlsx']
                                         )
 
 if uploaded_file is None:
-    st.info("Please upload file(s) in the sidebar")
+    st.info("Please upload file(s)")
     st.stop()
 
 elif uploaded_file is not None:
-
     original_file_name  = uploaded_file.name
 
     dataframe, columns  = load_dataframe(uploaded_file=uploaded_file)
+    if st.session_state["Sample Data"] == True:
+        st.write(dataframe.head(10))
+    columns             = list(columns)
 
-torque_analysis = st.sidebar.radio("Torque Analysis", ["Output", "Estimated", "Output & Estimated"], key = "torque_analysis")
+    columns.insert(0, "Not Selected")
 
-with st.sidebar.expander("Report", expanded=False):
-    report_name             = st.text_input("Test Name")
 
-with st.sidebar.expander("Test Limits", expanded=True):
-    if torque_analysis == "Output":
-        output_limit_nm     = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        output_limit_pc     = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
 
-    elif torque_analysis == "Estimated":
-        estimated_limit_nm  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_pc  = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
+st.markdown("---") 
 
-    elif torque_analysis == "Output & Estimated":
-        output_limit_nm     = st.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        output_limit_pc     = st.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_nm  = st.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
-        estimated_limit_pc  = st.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0))
 
-with st.sidebar.expander("Signals", expanded=True):
-    if torque_analysis == "Output":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_demanded     = st.selectbox("Torque Demanded",list(columns) )
 
-    elif torque_analysis == "Estimated":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_estimated    = st.selectbox("Torque Estimated",list(columns) )
+st.header("Test Details - (*Optional*)")
+test_dict = test_details()
 
-    elif torque_analysis == "Output & Estimated":
-        torque_measured     = st.selectbox("Torque Measured",list(columns) )
-        torque_demanded     = st.selectbox("Torque Demanded",list(columns) )
-        torque_estimated    = st.selectbox("Torque Estimated",list(columns) )
+
+
+st.markdown("---") 
+
+
+
+st.header("Configure Test Limits")
+st.radio("Torque Analysis", ["Output & Estimated","Output"], key = "Analysis Mode")
+limits(st.session_state["Analysis Mode"])
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Configure Signals")
+st.write("All signals must be manually selected if auto-select cannot find them.")
+signals(st.session_state["Analysis Mode"], columns,  t_demanded, t_estimated, t_measured, speed, vdc, idc)
+if any(value == 'Not Selected' for value in st.session_state.values()) == True:
+    st.stop()
+
+selected_data = col_removal(dataframe, list(st.session_state.values()))
+
+if st.session_state["Analysis Mode"] == "Output & Estimated":
+    selected_data.rename(columns = {        
+                                        st.session_state[speed]         :speed,
+                                        st.session_state[t_measured]    :t_measured,
+                                        st.session_state[t_demanded]    :t_demanded,
+                                        st.session_state[t_estimated]   :t_estimated,
+                                        st.session_state[vdc]           :vdc,
+                                        st.session_state[idc]           :idc
+                                    }, inplace = True)
+else:
+    selected_data.rename(columns = {        
+                                        st.session_state[speed]         :speed,
+                                        st.session_state[t_measured]    :t_measured,
+                                        st.session_state[t_demanded]    :t_demanded,
+                                        st.session_state[vdc]           :vdc,
+                                        st.session_state[idc]           :idc
+                                    }, inplace = True)
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Remove Transients - (*Optional*)")
+with st.spinner("Generating transient removal tool"):
+
+    st.write("Make sure the transient removal process is removing the required data; when there is a step change and time taken until steady state is reached.")
+    st.markdown("If this is not achieved, adjust the variable `Dwell Period` using the slider below")
+    st.markdown("Scan through torque steps using the `Sample` slider to determine if the `Dwell Period` is appropiate for the range of torque steps.")
+
+    dwell_col, sample_col = st.columns(2)
+    dwell_col.slider("Dwell Period", min_value=0, max_value=5000, step=1, value= 500, key = "Dwell Period")
+
+    Step_index, Stop_index          = determine_transients(selected_data, t_demanded, st.session_state["Dwell Period"]) 
+    sample_col.slider("Sample", min_value=1, max_value=abs(len(Stop_index)-1), step=1, value= round(abs(len(Stop_index)-1)/2), key = "Sample")
+
+    transient_sample                = sample_transients(Step_index, Stop_index, selected_data, st.session_state)    
+    transient_removal_sample_plot   = transient_removal_plot(transient_sample, Step_index, Stop_index, selected_data, st.session_state,  t_demanded, t_estimated, t_measured)
+
+    selected_data = selected_data.drop(['Step_Change'], axis = 1)
+
+    st.plotly_chart(transient_removal_sample_plot)
+
+    rem_trans_col1, rem_trans_col2, rem_trans_col3 = st.columns(3)
     
-    dc_voltage              = st.selectbox("DC Voltage",list(columns) )
-    dc_current              = st.selectbox("DC Current",list(columns) )
-    speed                   = st.selectbox("Speed",list(columns) )
-    #id                      = st.selectbox("Id",list(columns) )
-    #iq                      = st.selectbox("Iq",list(columns) )
-    #id                      = st.selectbox("Ud",list(columns) )
-    #iq                      = st.selectbox("Uq",list(columns) )
+    if rem_trans_col2.checkbox("Remove Transients", key = "Remove Transients") == True: 
+        selected_data = transient_removal(selected_data, Step_index, Stop_index)
+        st.success(str(len(Stop_index)-1) + " Transients Removed")
 
+
+
+st.markdown("---") 
+
+
+
+st.header("Round Test Point Variables")  
+st.subheader("Speed")
+st.number_input("Base", min_value=1, max_value=5000, value=50, step=1, key = "Speed Base")
+round_spd_col1, round_spd_col2, round_spd_col3 = st.columns(3)
+if round_spd_col2   .checkbox("Round Speed", key = "Round Speed") == True:
+    selected_data = round_speeds(selected_data, speed, t_demanded, st.session_state["Speed Base"])
+    number_of_rounded_speeds = len((selected_data[speed_round]).unique())
+    st.success(str(number_of_rounded_speeds) + " Unique Speed Points Found")
+else:
+    st.stop()
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Torque Demanded against Speed - (*Optional*)")
+if st.checkbox("Plot Test Data", key = "Plot Test Data") == True:
+    st.write("Below is a plot of the data representing Torque Demanded and Speed")
+    st.write("This is useful to determine if the data uploaded and rounded represent the correct test cases / behaviour")
+    with st.spinner("Generating Demanded Test Point Plot"):
+        st.plotly_chart(demanded_plot(selected_data, t_demanded, speed_round))
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Torque Output Accuracy")
+st.write("Minimum, Mean and Maximum errors are absoluted.")
+with st.spinner("Calculating errors..."):
+    selected_data = torque_error_calc(selected_data, t_demanded, t_estimated, t_measured, t_demanded_error_nm, t_demanded_error_pc, t_estimated_error_nm, t_estimated_error_pc)
+
+st.subheader("Newton Meter Error")
+st.write("Limit: " + "`± "+str(st.session_state["Output Limit [Nm]"]) + " Nm`")
+with st.spinner("Generating Torque Output [Nm] Accuracy Table"):
+    t_demanded_error_table_nm, min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm = error_nm_analysis(selected_data, st.session_state["Output Limit [Nm]"], st.session_state["Output Limit [%]"], t_demanded, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_demanded_error_nm, t_demanded_error_pc)
+    
+    t_dem_err_nm_col1, t_dem_err_nm_col2, t_dem_err_nm_col3 = st.columns(3)
+    min_error_demanded_nm_display, average_error_demanded_nm_display, max_error_demanded_nm_display = limit_format(min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, "Output", "Nm")
+
+    t_dem_err_nm_col1.subheader("Minimum Error")
+    t_dem_err_nm_col1.markdown(min_error_demanded_nm_display, unsafe_allow_html=True)
+
+    t_dem_err_nm_col2.subheader("Mean Error")
+    t_dem_err_nm_col2.markdown(average_error_demanded_nm_display, unsafe_allow_html=True)
+
+    t_dem_err_nm_col3.subheader("Maximum Error")
+    t_dem_err_nm_col3.markdown(max_error_demanded_nm_display, unsafe_allow_html=True)
+
+    st.write(t_demanded_error_table_nm)
+
+st.subheader("Percentage Error")
+with st.spinner("Generating Torque Output [%] Accuracy Table"):
+    t_demanded_error_table_pc, min_error_demanded_pc, average_error_demanded_pc, max_error_demanded_pc = error_pc_analysis(selected_data, st.session_state["Output Limit [Nm]"], st.session_state["Output Limit [%]"], t_demanded, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_demanded_error_nm, t_demanded_error_pc)
+    
+    t_dem_err_pc_col1, t_dem_err_pc_col2, t_dem_err_pc_col3 = st.columns(3)
+
+    min_error_demanded_pc_display, average_error_demanded_pc_display, max_error_demanded_pc_display = limit_format(min_error_demanded_pc, average_error_demanded_pc, max_error_demanded_pc, "Output", "%")
+
+    t_dem_err_pc_col1.subheader("Minimum Error")
+    t_dem_err_pc_col1.markdown(min_error_demanded_pc_display, unsafe_allow_html=True)
+
+    t_dem_err_pc_col2.subheader("Mean Error")
+    t_dem_err_pc_col2.markdown(average_error_demanded_pc_display, unsafe_allow_html=True)
+
+    t_dem_err_pc_col3.subheader("Maximum Error")
+    t_dem_err_pc_col3.markdown(max_error_demanded_pc_display, unsafe_allow_html=True)
+
+    st.write(t_demanded_error_table_pc)
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Torque Estimated Accuracy")
+st.write("Minimum, Mean and Maximum errors are absoluted.")
+st.subheader("Newton Meter Error")
+st.write("Limit: " + "`± "+str(st.session_state["Estimated Limit [Nm]"]) + " Nm`")
+
+with st.spinner("Generating Torque Estimated [Nm] Accuracy Table"):
+    t_estimated_error_table_nm, min_error_estimated_nm, average_error_estimated_nm, max_error_estimated_nm = error_nm_analysis(selected_data, st.session_state["Estimated Limit [Nm]"], st.session_state["Estimated Limit [%]"], t_estimated, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_estimated_error_nm, t_estimated_error_pc)
+    
+    t_est_err_nm_col1, t_est_err_nm_col2, t_est_err_nm_col3 = st.columns(3)
+
+    min_error_estimated_nm_display, average_error_estimated_nm_display, max_error_estimated_nm_display = limit_format(min_error_estimated_nm, average_error_estimated_nm, max_error_estimated_nm, "Estimated", "Nm")
+
+    t_est_err_nm_col1.subheader("Minimum Error")
+    t_est_err_nm_col1.markdown(min_error_estimated_nm_display, unsafe_allow_html=True)
+
+    t_est_err_nm_col2.subheader("Mean Error")
+    t_est_err_nm_col2.markdown(average_error_estimated_nm_display, unsafe_allow_html=True)
+
+    t_est_err_nm_col3.subheader("Maximum Error")
+    t_est_err_nm_col3.markdown(max_error_estimated_nm_display, unsafe_allow_html=True)
+
+    st.write(t_estimated_error_table_nm)
+
+st.subheader("Percentage Error")
+with st.spinner("Generating Torque Estimated [%] Accuracy Table"):
+    st.write("Limit: " + "`± "+str(st.session_state["Estimated Limit [%]"]) + " %`")
+    
+    t_estimated_error_table_pc, min_error_estimated_pc, average_error_estimated_pc, max_error_estimated_pc = error_pc_analysis(selected_data, st.session_state["Estimated Limit [Nm]"], st.session_state["Estimated Limit [%]"], t_estimated, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_estimated_error_nm, t_estimated_error_pc)
+    
+    t_est_err_pc_col1, t_est_err_pc_col2, t_est_err_pc_col3 = st.columns(3)
+    
+    min_error_estimated_pc_display, average_error_estimated_pc_display, max_error_estimated_pc_display = limit_format(min_error_estimated_pc, average_error_estimated_pc, max_error_estimated_pc, "Estimated", "%")
+
+    t_est_err_pc_col1.subheader("Minimum Error")
+    t_est_err_pc_col1.markdown(min_error_estimated_pc_display, unsafe_allow_html=True)
+
+    t_est_err_pc_col2.subheader("Mean Error")
+    t_est_err_pc_col2.markdown(average_error_estimated_pc_display, unsafe_allow_html=True)
+
+    t_est_err_pc_col3.subheader("Maximum Error")
+    t_est_err_pc_col3.markdown(max_error_estimated_pc_display, unsafe_allow_html=True)
+
+    st.write(t_estimated_error_table_pc)
+
+
+
+st.markdown("---") 
+
+
+
+st.header("Torque Demanded Accuracy Plots - *Optional*")
+st.subheader("Plot Configuration")
+t_d_error_nm_plot1, t_d_error_nm_plot2, t_d_error_nm_plot3, col_preview = st.columns(4)
+t_d_error_nm_plot1.selectbox("Chart Type", ["Contour", "Surface","Heatmap","3D Scatter"], key = "T_d_error_chart_type" )
+t_d_error_nm_plot2.selectbox("Color Scale", ["Diverging", "Sequential"], key = "T_d_error_chart_scale" )
+
+if st.session_state["T_d_error_chart_scale"] == 'Sequential':
+    color_map = list(sequential_color_dict().keys())
+else:
+    color_map = list(diverging_color_dict().keys())
+
+t_d_error_nm_plot3.selectbox("Color Map", color_map, key = "T_d_error_chart_color" )
+if  st.session_state["T_d_error_chart_scale"] == 'Sequential':
+    color_palette = sequential_color_dict().get(st.session_state["T_d_error_chart_color"])
+else:
+    color_palette = diverging_color_dict().get(st.session_state["T_d_error_chart_color"])
+
+colormap_preview = plot_color_set(color_palette, st.session_state["T_d_error_chart_color"])
+col_preview.image(colormap_preview, use_column_width = True)
+
+t_d_error_nm_plot4, t_d_error_nm_plot5, t_d_error_nm_plot6 = st.columns(3)
+t_d_error_nm_plot4.selectbox("Fill", ["NaN", "0"], key = "T_d_error_chart_fill" )
+t_d_error_nm_plot5.selectbox("Method", ["linear", "cubic"], key = "T_d_error_chart_method" )
+t_d_error_nm_plot6.number_input("Grid Resolution",  min_value = float(-500.0), max_value = float(500.0), value = float(50.0), step = float(1.0), key = "T_d_error_chart_grid")
+st.subheader("Data Overlay")
+if st.checkbox("Show Data Overlayed"):
+    overlay = True
+else:
+    overlay = False
+t_d_error_nm_ovr1, t_d_error_nm_ovr2 = st.columns(2)
+t_d_error_nm_ovr1.slider("Opacity",value=0.5,min_value=0.0, max_value=1.0, step=0.01, key = "T_d_error_overlay_opacity")
+t_d_error_nm_ovr2.color_picker("Overlay Color", key = "T_d_error_overlay_color")
+
+st.checkbox("Plot Torque Demanded [Nm] Accuracy Chart", key = "plot_demanded_error_nm")
+st.checkbox("Plot Torque Demanded [%] Accuracy Chart", key = "plot_demanded_error_pc")
+st.checkbox("Plot Torque Estimated [Nm] Accuracy Chart", key = "plot_estimated_error_nm")
+st.checkbox("Plot Torque Estimated [%] Accuracy Chart", key = "plot_estimated_error_pc")
+
+
+if st.session_state["plot_demanded_error_nm"] == True:
+    with st.spinner("Generating Plot"):
+        x_td_nm_formatted, y_td_nm_formatted, z_td_nm_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Torque Demanded [Nm]"], selected_data["Speed [rpm] Rounded"], selected_data["Torque Demanded Error [Nm]"])
+        t_d_error_nm_plot = plot_3D(speed_round,t_demanded,t_demanded_error_nm,x_td_nm_formatted, y_td_nm_formatted, z_td_nm_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
+        st.write(t_d_error_nm_plot)
+
+if st.session_state["plot_demanded_error_pc"] == True:
+    with st.spinner("Generating Plot"):
+        x_td_pc_formatted, y_td_pc_formatted, z_td_pc_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Torque Demanded [Nm]"], selected_data["Speed [rpm] Rounded"], selected_data["Torque Demanded Error [%]"])
+        t_d_error_pc_plot = plot_3D(speed_round,t_demanded,t_demanded_error_pc,x_td_pc_formatted, y_td_pc_formatted, z_td_pc_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
+        st.write(t_d_error_pc_plot)
+
+
+if st.session_state["plot_estimated_error_nm"] == True:
+    with st.spinner("Generating Plot"):
+        x_te_nm_formatted, y_te_nm_formatted, z_te_nm_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Torque Estimated [Nm]"], selected_data["Speed [rpm] Rounded"], selected_data["Torque Estimated Error [Nm]"])
+        t_e_error_nm_plot = plot_3D(speed_round,t_estimated,t_estimated_error_nm,x_te_nm_formatted, y_te_nm_formatted, z_te_nm_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
+        st.write(t_e_error_nm_plot)
+
+
+if st.session_state["plot_estimated_error_pc"] == True:
+    with st.spinner("Generating Plot"):
+        x_te_pc_formatted, y_te_pc_formatted, z_te_pc_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Torque Estimated [Nm]"], selected_data["Speed [rpm] Rounded"], selected_data["Torque Estimated Error [%]"])
+        t_e_error_pc_plot = plot_3D(speed_round,t_estimated,t_estimated_error_pc, x_te_pc_formatted, y_te_pc_formatted, z_te_pc_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
+        st.write(t_e_error_pc_plot)
+#report_table = pd.DataFrame([test_dict])
+#report_table = report_table.astype(str)
+#report_table = report_table.T
