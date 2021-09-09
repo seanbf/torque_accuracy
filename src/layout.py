@@ -1,7 +1,7 @@
 import streamlit as st
 import getpass
 
-def test_details():
+def report_details():
 
     controller_manfactures = [
         "Turntide",
@@ -189,115 +189,6 @@ def limits(analysis_toggle):
         col_estimated.subheader("Estimated Limits")
         col_estimated.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [Nm]")
         col_estimated.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [%]")
-    return
-
-def signals(analysis_toggle, columns, t_demanded, t_estimated, t_measured, speed, vdc, idc):
-
-    torque_measured_signals = [
-        "Transducer_Torque_IOP",
-        "Transducer_Torque_MCP",
-        "Transducer_Trq_IOP",
-        "Transducer_Trq_MCP"
-    ]
-
-    speed_signals = [
-        "Transducer_Speed_IOP",
-        "Transducer_Speed_MCP",
-        "tesInputData.L2mPosSpdArb_RotorSpd_MCP",
-        "tesInputData.L2mPosSpdArb_RotorSpd_IOP"
-    ]
-
-    torque_demanded_signals = [
-        " TesOp_B.L2m_TarTrq_MCP",
-        "TesOp_B.L2m_TarTrq_MCP",
-        " TesOp_B.L2m_TarTrq_IOP",
-        "TesOp_B.L2m_TarTrq_IOP"
-    ]
-
-    torque_estimated_signals = [
-        " tesOutputData.L2mTes_EstTrq.val_MCP",
-        "tesOutputData.L2mTes_EstTrq.val_MCP",
-        " tesOutputData.L2mTes_EstTrq.val_IOP",
-        "tesOutputData.L2mTes_EstTrq.val_IOP"
-    ]
-
-    dc_voltage_signals = [
-        " sensvdcOutputData.L2mSensVdc_Vdc.val_MCP",
-        "sensvdcOutputData.L2mSensVdc_Vdc.val_MCP",
-        " sensvdcOutputData.L2mSensVdc_Vdc.val_IOP",
-        "sensvdcOutputData.L2mSensVdc_Vdc.val_IOP"
-    ]
-
-    dc_current_signals = [
-        " sensidcOutputData.L2mSensIdc_Idc.val_MCP",
-        "sensidcOutputData.L2mSensIdc_Idc.val_MCP",
-        " sensidcOutputData.L2mSensIdc_Idc.val_IOP",
-        "sensidcOutputData.L2mSensIdc_Idc.val_IOP"
-    ]
-
-
-    # Torque measured auto-select
-    for signals in torque_measured_signals:
-        if signals in columns:
-            list_index = list(columns).index(signals)
-            st.selectbox("Torque Measured",list(columns),  key = t_measured, index=list_index)
-            break
-        elif signals not in columns: 
-            st.selectbox("Torque Measured",list(columns),  key = t_measured, index = 0)
-            break
-
-    # Torque demanded auto-select
-    for signals in torque_demanded_signals:
-        if signals in columns:
-            list_index = list(columns).index(signals)
-            st.selectbox("Torque Demanded",list(columns), key = t_demanded, index=list_index)
-            break
-        else: 
-            st.selectbox("Torque Demanded",list(columns), key = t_demanded )
-            break
-
-    if analysis_toggle == "Output & Estimated":
-            # Torque estimated auto-select
-        for signals in torque_estimated_signals:
-            if signals in columns:
-                list_index = list(columns).index(signals)
-                st.selectbox("Torque Estimated",list(columns), key = t_estimated, index=list_index)
-                break
-            else: 
-                st.selectbox("Torque Estimated",list(columns), key = t_estimated)
-                break
-
-    # Speed auto-select
-    for signals in speed_signals:
-        if signals in columns:
-            list_index = list(columns).index(signals)
-            st.selectbox("Speed",list(columns), key = speed, index=list_index)
-            break
-        else: 
-            st.selectbox("Speed",list(columns), key = speed, index = 0)
-            break
-        
-    # DC Voltage auto-select
-    for signals in dc_voltage_signals:
-        if signals in columns:
-            list_index = list(columns).index(signals)
-            st.selectbox("DC Voltage",list(columns), key = vdc, index=list_index)
-            break
-        else: 
-            st.selectbox("DC Voltage",list(columns), key = vdc )
-            break
-
-    # DC Current auto-select
-    for signals in dc_current_signals:
-        if signals in columns:
-            list_index = list(columns).index(signals)
-            st.selectbox("DC Current",list(columns), key = idc, index=list_index)
-            break
-        else: 
-            st.selectbox("DC Current",list(columns), key = idc )
-            break
-        
-    
     return
 
 def limit_format(min, average, max, limit, unit):

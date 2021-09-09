@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
-from src.layout import test_details, limits, signals, limit_format
+from streamlit.proto.Empty_pb2 import Empty
+from src.layout import report_details, limits,  limit_format
 from src.utils import load_dataframe, col_removal, determine_transients, sample_transients, transient_removal, round_speeds, torque_error_calc, error_nm_analysis, error_pc_analysis, z_col_or_grid
 from src.plotter import demanded_plot, transient_removal_plot, plot_3D
 from src.colors import sequential_color_dict, diverging_color_dict, plot_color_set
-
+from src.symbols import symbol_auto_select, speed_rpm_symbols, t_demanded_symbols, t_measured_symbols, t_estimated_signals, vdc_symbols,idc_symbols
 page_config = st.set_page_config(
                                 page_title              ="Torque Accuracy Tool", 
                                 page_icon               ="🎯", 
@@ -45,18 +46,17 @@ st.checkbox("Show first 10 rows of Data", key = "Sample Data")
 
 uploaded_file = st.file_uploader(   
                                         label="",
-                                        accept_multiple_files=False,
+                                        accept_multiple_files=True,
                                         type=['csv', 'xlsx']
                                         )
 
-if uploaded_file is None:
+if uploaded_file == []:
     st.info("Please upload file(s)")
     st.stop()
 
-elif uploaded_file is not None:
-    original_file_name  = uploaded_file.name
+else:
 
-    dataframe, columns  = load_dataframe(uploaded_file=uploaded_file)
+    dataframe, columns  = load_dataframe(uploaded_files=uploaded_file)
     if st.session_state["Sample Data"] == True:
         st.write(dataframe.head(10))
     columns             = list(columns)
@@ -69,8 +69,8 @@ st.markdown("---")
 
 
 
-st.header("Test Details - (*Optional*)")
-test_dict = test_details()
+st.header("Report Details - (*Optional*)")
+test_dict = report_details()
 
 
 
@@ -90,7 +90,20 @@ st.markdown("---")
 
 st.header("Configure Signals")
 st.write("All signals must be manually selected if auto-select cannot find them.")
-signals(st.session_state["Analysis Mode"], columns,  t_demanded, t_estimated, t_measured, speed, vdc, idc)
+
+st.selectbox(t_measured,list(columns),  key = t_measured, index = symbol_auto_select(columns, t_measured_symbols))
+
+st.selectbox(t_demanded,list(columns), key = t_demanded, index = symbol_auto_select(columns, t_demanded_symbols))
+
+if st.session_state["Analysis Mode"] == "Output & Estimated":
+    st.selectbox(t_estimated,list(columns), key = t_estimated, index = symbol_auto_select(columns, t_estimated_signals))
+
+st.selectbox(speed,list(columns), key = speed, index = symbol_auto_select(columns, speed_rpm_symbols))
+
+st.selectbox(vdc,list(columns), key = vdc, index = symbol_auto_select(columns, vdc_symbols))
+
+st.selectbox(idc,list(columns), key = idc, index = symbol_auto_select(columns, idc_symbols))
+
 if any(value == 'Not Selected' for value in st.session_state.values()) == True:
     st.stop()
 
@@ -127,11 +140,14 @@ with st.spinner("Generating transient removal tool"):
     st.markdown("If this is not achieved, adjust the variable `Dwell Period` using the slider below")
     st.markdown("Scan through torque steps using the `Sample` slider to determine if the `Dwell Period` is appropiate for the range of torque steps.")
 
-    dwell_col, sample_col = st.columns(2)
+    dwell_col, sample_col, t_d_filter_col = st.columns(3)
     dwell_col.slider("Dwell Period", min_value=0, max_value=5000, step=1, value= 500, key = "Dwell Period")
+    t_d_filter_col.number_input("Torque Demanded Filter", min_value=0.0,max_value=300.0,step=0.1,value=0.0,help="If torque demand is not as consistent as expected i.e. during derate, apply a threshold to ignore changes smaller than the filter",key = "Torque Demanded Filter")
 
-    Step_index, Stop_index          = determine_transients(selected_data, t_demanded, st.session_state["Dwell Period"]) 
+    Step_index, Stop_index          = determine_transients(selected_data,t_demanded,st.session_state["Torque Demanded Filter"], st.session_state["Dwell Period"]) 
+    
     sample_col.slider("Sample", min_value=1, max_value=abs(len(Stop_index)-1), step=1, value= round(abs(len(Stop_index)-1)/2), key = "Sample")
+
 
     transient_sample                = sample_transients(Step_index, Stop_index, selected_data, st.session_state)    
     transient_removal_sample_plot   = transient_removal_plot(transient_sample, Step_index, Stop_index, selected_data, st.session_state,  t_demanded, t_estimated, t_measured)
@@ -140,9 +156,10 @@ with st.spinner("Generating transient removal tool"):
 
     st.plotly_chart(transient_removal_sample_plot)
 
-    rem_trans_col1, rem_trans_col2, rem_trans_col3 = st.columns(3)
+rem_trans_col1, rem_trans_col2, rem_trans_col3 = st.columns(3)
     
-    if rem_trans_col2.checkbox("Remove Transients", key = "Remove Transients") == True: 
+if rem_trans_col2.checkbox("Remove Transients", key = "Remove Transients") == True: 
+    with st.spinner("Removing Transients from data"):
         selected_data = transient_removal(selected_data, Step_index, Stop_index)
         st.success(str(len(Stop_index)-1) + " Transients Removed")
 
@@ -162,7 +179,7 @@ if round_spd_col2   .checkbox("Round Speed", key = "Round Speed") == True:
     st.success(str(number_of_rounded_speeds) + " Unique Speed Points Found")
 else:
     st.stop()
-
+st.subheader("Voltage")
 
 
 st.markdown("---") 
@@ -285,7 +302,7 @@ st.header("Torque Demanded Accuracy Plots - *Optional*")
 st.subheader("Plot Configuration")
 t_d_error_nm_plot1, t_d_error_nm_plot2, t_d_error_nm_plot3, col_preview = st.columns(4)
 t_d_error_nm_plot1.selectbox("Chart Type", ["Contour", "Surface","Heatmap","3D Scatter"], key = "T_d_error_chart_type" )
-t_d_error_nm_plot2.selectbox("Color Scale", ["Diverging", "Sequential"], key = "T_d_error_chart_scale" )
+t_d_error_nm_plot2.selectbox("Color Scale", ["Sequential", "Diverging"], key = "T_d_error_chart_scale" )
 
 if st.session_state["T_d_error_chart_scale"] == 'Sequential':
     color_map = list(sequential_color_dict().keys())

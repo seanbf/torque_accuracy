@@ -4,29 +4,29 @@ import pandas as pd
 import streamlit as st
 
 @st.cache
-def load_dataframe(uploaded_file):
+def load_dataframe(uploaded_files):
     try:
-        df = pd.read_csv(uploaded_file)
+        df = pd.concat( (pd.read_csv(f) for f in uploaded_files), ignore_index=True)
     except:
-        df = pd.read_excel(uploaded_file)
+        df = pd.concat( (pd.read_excel(f) for f in uploaded_files), ignore_index=True)
 
     columns = list(df.columns)
     columns.append(None)
 
     return df, columns
 
-def determine_transients(df, t_demanded, dwell_period):
+def determine_transients(df, t_demanded, torque_demanded_filter, dwell_period):
     df["Step_Change"] = '0'
     df["Step_Change"] = df[t_demanded].diff()
-
-    Step_index          = ( df.index[df['Step_Change'] != 0] - 1 )
+    
+    Step_index          = ( df.index[abs(df['Step_Change']) >= torque_demanded_filter] - 1 )
     Stop_index          = Step_index + dwell_period
 
     return Step_index, Stop_index
 
 def sample_transients(Step_index, Stop_index, df, test_dict):
 
-    transient_sample = df.iloc[Step_index[test_dict["Sample"]]-250 : Stop_index[test_dict["Sample"]]+250]
+    transient_sample = df.iloc[ Step_index[test_dict["Sample"]]-250 : Stop_index[test_dict["Sample"]]+250 ]
     
     return transient_sample
 

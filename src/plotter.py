@@ -95,13 +95,16 @@ def transient_removal_plot(transient_sample, Step_index, Stop_index, df, test_di
                                     )
 
     transient_plot.update_layout    (
-                                    hovermode="x unified"
+                                    hovermode="x unified",
+                                    
                                     )
     return transient_plot
 
 @st.cache
 def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, overlay, overlay_alpha, overlay_color):
     with st.spinner("Generating 3D Plot"):
+        label_dict = dict()
+        trace_dict = dict()
 
         plot_3D = go.Figure()
 
@@ -110,7 +113,7 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
                                             z           = z,
                                             x           = x, 
                                             y           = y,
-                                            colorscale  = color_palette,
+                                            #colorscale  = color_palette,
                                             hovertemplate = x_string + ': %{x:.2f}' + 
                                                             '<br>' + y_string + ': %{y:.2f}</br>' +
                                                             z_string + ': %{z:.2f}',
@@ -131,57 +134,79 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
                                                                                     size=12,
                                                                                     family='Arial, sans'
                                                                                     )
+                                                                
                                                                 )
+                                            
+                                            
                                     )       )
+            label_dict["title"]         = z_string
+            label_dict["xaxis"]         = dict(title=x_string)
+            label_dict["yaxis"]         = dict(title=y_string)
+            trace_dict["zmid"]          = 0
+            trace_dict["colorscale"]    = color_palette
 
         if chart_type == 'Surface':
-                        plot_3D.add_trace(go.Surface  (
-                                            z           = z,
-                                            x           = x, 
-                                            y           = y,
+            plot_3D.add_trace(go.Surface  (
+                                z           = z,
+                                x           = x, 
+                                y           = y,
 
-                                            contours =  {
-                                                        "x": {"show": True},
-                                                        "z": {"show": True}
-                                                        },
+                                contours =  {
+                                            "x": {"show": True},
+                                            "z": {"show": True}
+                                            },
 
-                                            colorscale  = color_palette,
-                                     
-                            
-                                            hovertemplate = x_string + ': %{x:.2f}' + 
-                                                            '<br>' + y_string + ': %{y:.2f}</br>' +
-                                                            z_string + ': %{z:.2f}',
+                                colorscale  = color_palette,
+                         
+                
+                                hovertemplate = x_string + ': %{x:.2f}' + 
+                                                '<br>' + y_string + ': %{y:.2f}</br>' +
+                                                z_string + ': %{z:.2f}',
 
-                                            colorbar    = dict  (
-                                                                title       = z_string,
-                                                                titleside   = 'right',
-                                                                titlefont   = dict  (
-                                                                                    size=12,
-                                                                                    family='Arial, sans'
-                                                                                    )
-                                                                )
-                                            )           )
+                                colorbar    = dict  (
+                                                    title       = z_string,
+                                                    titleside   = 'right',
+                                                    titlefont   = dict  (
+                                                                        size=12,
+                                                                        family='Arial, sans'
+                                                                        ),
+                                                                        
+                                                    )
+                                )           )
+            label_dict["title"]         = z_string
+            label_dict["xaxis"]         = dict(title=x_string)
+            label_dict["yaxis"]         = dict(title=y_string)
+            trace_dict["cmid"]          = 0
+            trace_dict["colorscale"]    = color_palette
+
         if chart_type == 'Heatmap':
-                        plot_3D.add_trace(go.Heatmap  (
-                                            z           = z,
-                                            x           = x, 
-                                            y           = y,
+            plot_3D.add_trace(go.Heatmap  (
+                                z           = z,
+                                x           = x, 
+                                y           = y,
 
-                                            colorscale  = color_palette,
+                                colorscale  = color_palette,
 
-                                            hovertemplate = x_string + ': %{x:.2f}' + 
-                                                            '<br>' + y_string + ': %{y:.2f}</br>' +
-                                                            z_string + ': %{z:.2f}',
+                                hovertemplate = x_string + ': %{x:.2f}' + 
+                                                '<br>' + y_string + ': %{y:.2f}</br>' +
+                                                z_string + ': %{z:.2f}',
 
-                                            colorbar    = dict  (
-                                                                title       = z_string,
-                                                                titleside   = 'right',
-                                                                titlefont   = dict  (
-                                                                                    size=12,
-                                                                                    family='Arial, sans'
-                                                                                    )
-                                                                )
-                                            )           )
+                                colorbar    = dict  (
+                                                    title       = z_string,
+                                                    titleside   = 'right',
+                                                    titlefont   = dict  (
+                                                                        size=12,
+                                                                        family='Arial, sans'
+                                                                        ),
+                                                    
+                                                    
+                                                    )
+                                )           )
+            label_dict["title"]         = z_string
+            label_dict["xaxis"]         = dict(title=x_string)
+            label_dict["yaxis"]         = dict(title=y_string)
+            trace_dict["zmid"]          = 0
+            trace_dict["colorscale"]    = color_palette
 
         if chart_type == '3D Scatter':
             plot_3D.add_trace(go.Scatter3d  (
@@ -191,7 +216,8 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
                                             mode        = 'markers',
                                             marker      = dict(
                                                         color       = z,
-                                                        colorscale  = color_palette,
+                                                        colorscale  = "Jet",
+                                                        
                                                         opacity     = 0.7,
                                                         colorbar    = dict  (
                                                                             title       = z_string,
@@ -210,6 +236,11 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
           
 
                                             )           )
+            label_dict["title"]         = z_string
+            label_dict["xaxis"]         = dict(title=x_string)
+            label_dict["yaxis"]         = dict(title=y_string)
+            #trace_dict["cmid"]          = 0
+            #trace_dict["colorscale"]    = color_palette
         
         if (overlay == True) and (chart_type != "3D Scatter" or "Surface") :
             plot_3D.add_trace	(go.Scatter (  
@@ -228,19 +259,8 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
                                                     ),
                             ),     
                 )
-        label_dict = dict()
-        if chart_type == "3D Scatter" or "Surface":
+    
+        plot_3D.update_layout(label_dict)              
+        plot_3D.update_traces(trace_dict)
         
-            label_dict["autosize"] = True
-            label_dict["title"]    = z_string
-            label_dict["xaxis"]    = dict(title=x_string)
-            label_dict["yaxis"]    = dict(title=y_string)
-        else:
-            label_dict["autosize"] = True,
-            label_dict["title"]    = z_string
-            label_dict["xaxis"]    = dict(title=x_string)
-            label_dict["yaxis"]    = dict(title=y_string)
-                       
-        plot_3D.update_layout(label_dict)
-
         return plot_3D

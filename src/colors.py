@@ -8,7 +8,18 @@ from palettable.scientific.diverging    import Berlin_20,   Broc_20,    Cork_20,
 from palettable.matplotlib              import Inferno_20,  Magma_20,   Plasma_20,      Viridis_20
 from palettable.colorbrewer.sequential  import Blues_9,     BuGn_9,     BuPu_9,         GnBu_9,     Greens_9,       Greys_9,        OrRd_9,         Oranges_9,      PuBu_9,     PuBuGn_9,   PuRd_9,             Purples_9,           RdPu_9, Reds_9,YlGn_9,YlGnBu_9,YlOrBr_9
 import plotly.graph_objects as go
+import plotly.express as px
 
+RGB_map =      [[0.0,   "rgb(0, 0, 202)"],
+                [0.1,   "rgb(0, 0, 224)"],
+                [0.2,   "rgb(0, 112, 224)"],
+                [0.3,   "rgb(0, 168, 224)"],
+                [0.49,  "rgb(0, 224, 0)"],
+                [0.51,  "rgb(0, 224, 0)"],
+                [0.6,   "rgb(224, 168, 0)"],
+                [0.7,   "rgb(215, 111, 0)"],
+                [0.8,   "rgb(224, 0, 0)"],
+                [1.0,   "rgb(247, 0, 0)"]]
 
 @st.cache
 def qualitive_color_dict():
@@ -87,6 +98,7 @@ def sequential_color_dict():
     """
 
     color_dict    =      dict({
+                        'RGB'                   :RGB_map,
                         'Viridis'               :Viridis_20.hex_colors, 
                         'Inferno'               :Inferno_20.hex_colors, 
                         'Magma'                 :Magma_20.hex_colors, 
