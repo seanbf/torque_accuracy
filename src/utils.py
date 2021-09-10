@@ -83,88 +83,73 @@ def error_nm_analysis(df, limit_nm, limit_pc, t_to_analyse ,t_demanded, t_estima
     
         error_table_nm = df[abs(df[error_nm]) > limit_nm].copy()
     
-        if ( abs(error_table_nm[t_to_analyse]) < (limit_nm/(limit_pc/100)) ).any():
-            st.write((limit_nm/(limit_pc/100)))
-            error_table_nm = error_table_nm[abs(error_table_nm[t_to_analyse]) < (limit_nm/(limit_pc/100))].copy()
-
+        if ( abs(error_table_nm[t_to_analyse]) <= (limit_nm/(limit_pc/100)) ).any():
+            
+            error_table_nm = error_table_nm[abs(error_table_nm[t_to_analyse]) <= (limit_nm/(limit_pc/100))].copy()
             error_table_nm.sort_values(by=error_nm, key = abs, ascending = False, inplace = True)
-
             error_table_nm = error_table_nm.filter([error_nm, error_pc, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
             
-            st.write("❌ The following Torque error(s) (Nm) resulted in surpassing the limits")
+            flag = False
+
         else:
-
+            
+            error_table_nm = df[abs(df[t_to_analyse]) <= (limit_nm/(limit_pc/100))].copy()
             error_table_nm.sort_values(by=error_nm,key = abs, ascending = False, inplace = True)
-
             error_table_nm = error_table_nm[0:5]
-
             error_table_nm = error_table_nm.filter([error_nm, error_pc, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
             
-            st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
-            st.write("Upto five of the maximum torque errors (Nm) shown below")
-            st.write("These errors are above " + str((limit_nm/(limit_pc/100))) + " Nm demand, and therefore are omitted.")
+            flag = True
+
     else:
         error_table_nm = df.copy()
-
         error_table_nm.sort_values(by=[error_nm, error_pc],key = abs, ascending = False, inplace = True)
-
         error_table_nm = error_table_nm[0:5]
-
         error_table_nm = error_table_nm.filter([error_nm, error_pc, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
         
-        st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
-        st.write("Upto five of the maximum torque errors shown below")
+        flag = True
 
     min_error       = min(abs(error_table_nm[error_nm]))
     average_error   = np.mean(abs(error_table_nm[error_nm]))
     max_error       = max(abs(error_table_nm[error_nm]))
 
-    return error_table_nm, min_error, average_error, max_error
+    return error_table_nm, min_error, average_error, max_error, flag
 
 def error_pc_analysis(df, limit_nm, limit_pc, t_to_analyse, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, error_nm, error_pc):
 
     if ( abs(df[error_pc]) > limit_pc ).any():
     
         error_table_pc = df[abs(df[error_pc]) > limit_pc].copy()
-
-        if ( abs(error_table_pc[t_to_analyse]) < (limit_nm/(limit_pc/100)) ).any():
         
-            error_table_pc = error_table_pc[abs(error_table_pc[t_to_analyse]) < (limit_nm/(limit_pc/100))].copy()
-
+        if ( abs(error_table_pc[t_to_analyse]) > (limit_nm/(limit_pc/100)) ).any():
+        
+            error_table_pc = error_table_pc[abs(error_table_pc[t_to_analyse]) > (limit_nm/(limit_pc/100))].copy()
             error_table_pc.sort_values(by=error_pc, key = abs, ascending = False, inplace = True)
-
             error_table_pc = error_table_pc.filter([error_pc, error_nm, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
 
-            st.write("❌ The following Torque error(s) (%) resulted in surpassing the limits")
+            flag = False
+            
         else:
 
-            st.write("✔️ No torque error(Nm) resulted in surpassing the limits")
-            st.write("Upto five of the maximum torque errors (%) shown below")
-
             error_table_pc.sort_values(by=error_pc,key = abs, ascending = False, inplace = True)
-
             error_table_pc = error_table_pc[0:5]
-
             error_table_pc = error_table_pc.filter([error_pc, error_nm, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
 
+            flag = True
     else:
-        st.write("✔️ No torque error (%) resulted in surpassing the limits")
-        st.write("Upto five of the maximum torque errors shown below")
+
 
         error_table_pc = df.copy()
-
         error_table_pc.sort_values(by=[error_pc, error_nm],key = abs, ascending = False, inplace = True)
-
         error_table_pc = error_table_pc[0:5]
-
         error_table_pc = error_table_pc.filter([error_pc, error_nm, t_measured, t_demanded, t_estimated, speed_round, vdc, idc])
 
+        flag = True
 
     min_error       = min(abs(error_table_pc[error_pc]))
     average_error   = np.mean(abs(error_table_pc[error_pc]))
     max_error       = max(abs(error_table_pc[error_pc]))
     
-    return error_table_pc, min_error, average_error, max_error
+    return error_table_pc, min_error, average_error, max_error, flag
 
 def z_col_or_grid(chart_type, fill, method, grid_res, x_in, y_in, z_in):
     '''

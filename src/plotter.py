@@ -264,3 +264,168 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
         plot_3D.update_traces(trace_dict)
         
         return plot_3D
+
+def plot_pie(df, err_nm, err_pc, limit_nm, limit_pc):
+
+    Pass = len( df[(abs(err_nm) <= limit_nm) & (abs(err_pc) <= limit_pc)] )
+    Fail = len( df[(abs(err_nm) > limit_nm) & (abs(err_pc) > limit_pc)] )
+
+
+    plot = go.Figure   (
+                                    go.Pie  (
+                                            labels=['Pass','Fail'], 
+                                            values=[Pass, Fail],
+                                            marker_colors=["Green","Red"]
+                                            )   
+                                    )
+
+    return plot
+
+def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_measured,speed_rpm_round, limit_nm, limit_pc):
+    plot_pc = 0
+    plot_pc = df[ (abs(df[t_demanded]) >= limit_nm/(limit_pc/100)) ]
+
+    plot_nm = 0
+    plot_nm = df[ (abs(df[t_demanded]) < limit_nm/(limit_pc/100)) ]
+
+    plot = go.Figure()
+
+    plot.add_trace(go.Scatter   (  
+                                            x               = plot_pc[t_demanded], 
+                                            y               = plot_pc[t_demanded_error_pc],
+                                            name            = t_demanded_error_pc,
+                                            customdata      = plot_pc[t_measured],
+                                            text            = plot_pc[speed_rpm_round],
+                                            hovertemplate   = 'Torque Measured: %{customdata:.2f} Nm' + 
+                                                              '<br>Torque Demanded: %{x:.2f} Nm' +
+                                                              '<br>Torque Demanded Error: %{y:.2f} %' +
+                                                              '<br>Speed: %{text:.2f} rpm',
+                                            mode            = "markers",
+                                            marker_symbol   = 'circle-dot',
+                                            marker          = dict  (
+                                                                    color = "green",
+                                                                    opacity=0.5,
+                                                                    line=dict(
+                                                                                color='black',
+                                                                                width=1
+                                                                                )
+                                                                    )
+                                )           )
+
+
+    plot.add_trace(go.Scatter   (  
+                                            x               = plot_nm[t_demanded], 
+                                            y               = plot_nm[t_demanded_error_nm],
+                                            name            = "Torque Demanded Error (Nm)",
+                                            customdata      = plot_nm[t_measured],
+                                            text            = plot_nm[speed_rpm_round],
+                                            hovertemplate   = 'Torque Measured: %{customdata:.2f} Nm' + 
+                                                              '<br>Torque Demanded: %{x:.2f} Nm' +
+                                                              '<br>Torque Demanded Error: %{y:.2f} Nm' +
+                                                              '<br>Speed: %{text:.2f} rpm',
+                                            mode            = "markers",
+                                            marker_symbol   = 'circle-dot',
+                                            marker          = dict  (
+                                                                    color = "LightSkyBlue",
+                                                                    opacity=0.5,
+                                                                    line=dict(
+                                                                                color='MediumPurple',
+                                                                                width=1
+                                                                                )
+                                                                    )
+                                )           )
+
+    plot.add_shape(
+                                    type = "line",
+                                    x0   = 0, 
+                                    y0   = limit_nm, 
+                                    x1   = limit_nm/(limit_pc/100), 
+                                    y1   = limit_nm,
+                                    line = dict
+                                             (
+                                                color="LightSkyBlue",
+                                                width=1,
+                                                dash="dot",
+                                            )
+                                    )
+
+    plot.add_shape(
+                                    type = "line",
+                                    x0   = 0, 
+                                    y0   = -1* limit_nm, 
+                                    x1   = limit_nm/(limit_pc/100), 
+                                    y1   = -1* limit_nm,
+                                    line = dict
+                                             (
+                                                color="LightSkyBlue",
+                                                width=1,
+                                                dash="dot",
+                                            )
+                                    )
+
+    plot.add_shape(
+                                    type = "line",
+                                    x0   = 0, 
+                                    y0   = limit_nm, 
+                                    x1   = -limit_nm/(limit_pc/100), 
+                                    y1   = limit_nm,
+                                    line = dict
+                                             (
+                                                color="LightSkyBlue",
+                                                width=1,
+                                                dash="dot",
+                                            )
+                                    )
+
+    plot.add_shape(
+                                    type = "line",
+                                    x0   = 0, 
+                                    y0   = -1* limit_nm, 
+                                    x1   = -limit_nm/(limit_pc/100), 
+                                    y1   = -1* limit_nm,
+                                    line = dict
+                                             (
+                                                color="LightSkyBlue",
+                                                width=1,
+                                                dash="dot",
+                                            )
+                                    )
+
+    plot.add_trace(go.Scatter   (  
+                                            x               = plot_pc[t_demanded], 
+                                            y               = plot_pc[t_demanded]*limit_pc/100,
+                                            name            = "Torque Estimated Error Limit (+%)",
+                                            mode            = "lines", 
+                                            showlegend      = False,                                       
+                                            line=dict(
+                                                        color="green",
+                                                        width=1,
+                                                        dash="dot",
+                                                    )
+                                )           )
+
+    plot.add_trace(go.Scatter   (  
+                                            x               = plot_pc[t_demanded], 
+                                            y               = plot_pc[t_demanded]*-limit_pc/100,
+                                            name            = "Torque Estimated Error Limit (-%)",
+                                            mode            = "lines",
+                                            showlegend      = False,
+                                            line=dict(
+                                                        color="green",
+                                                        width=1,
+                                                        dash="dot",
+                                                    )
+
+                                )           )
+
+    plot.update_layout  (   
+                                    title       ='Torque Demanded : Measured Error',
+                                    xaxis_title ='Torque Demanded (Nm)',
+                                    yaxis_title ='Torque Error',
+                                    xaxis       = dict  (
+                                                        tickmode = 'linear',
+                                                        tick0 = 0, 
+                                                        dtick = 10
+                                                        )
+                                    )
+    return plot

@@ -104,72 +104,70 @@ def report_details():
         "Sensor Technologies (SN:XX)"
     ]
 
-    with st.expander("Test Details", expanded=False):
+    test_name, user, date               = st.columns(3)
 
-        test_name, user, date               = st.columns(3)
+    #Report Details
+    test_name.text_input("Test Name", key = "Test Name")
+    user.text_input("User", value = getpass.getuser(), key = "User")
+    date.date_input("Date", key = "Test Date")
+    st.text_area("Test Notes", key = "Test Note")
 
-        #Report Details
-        test_name.text_input("Test Name", key = "Test Name")
-        user.text_input("User", value = getpass.getuser(), key = "User")
-        date.date_input("Date", key = "Test Date")
-        st.text_area("Test Notes", key = "Test Note")
+    dyno_fields, software_fields            = st.columns(2)
 
-        dyno_fields, software_fields            = st.columns(2)
+    #Dyno
+    dyno_fields.subheader("Dyno")
+    dyno_fields.selectbox("Dyno", dynos, key = "Dyno")
+    dyno_fields.selectbox("Torque Speed Sensor",torque_speed_sensors, key = "Torque Speed Sensor")
+    dyno_fields.date_input("Date", key = "Sensor Calibration Date")
 
-        #Dyno
-        dyno_fields.subheader("Dyno")
-        dyno_fields.selectbox("Dyno", dynos, key = "Dyno")
-        dyno_fields.selectbox("Torque Speed Sensor",torque_speed_sensors, key = "Torque Speed Sensor")
-        dyno_fields.date_input("Date", key = "Sensor Calibration Date")
+    #Software
+    software_fields.subheader("Software")
+    software_fields.selectbox("Level", sw_levels, key = "Software Level")
+    software_fields.text_input("Location", key = "Software Location")
+    software_fields.text_area("Notes", key = "Software Notes")
 
-        #Software
-        software_fields.subheader("Software")
-        software_fields.selectbox("Level", sw_levels, key = "Software Level")
-        software_fields.text_input("Location", key = "Software Location")
-        software_fields.text_area("Notes", key = "Software Notes")
+    controller_field, motor_field   = st.columns(2)
 
-        controller_field, motor_field   = st.columns(2)
+    #Controllers
+    controller_field.subheader("Controller")
+    controller_field.selectbox("Manufacturer", controller_manfactures, key = "Controller Manufacturer")
 
-        #Controllers
-        controller_field.subheader("Controller")
-        controller_field.selectbox("Manufacturer", controller_manfactures, key = "Controller Manufacturer")
+    if st.session_state["Controller Manufacturer"] == 'Turntide':
+        controller_field.selectbox("Model", turntide_controllers, key = "Controller Model")
 
-        if st.session_state["Controller Manufacturer"] == 'Turntide':
-            controller_field.selectbox("Model", turntide_controllers, key = "Controller Model")
+    elif st.session_state["Controller Manufacturer"] == 'Avid':
+        controller_field.selectbox("Model", avid_controllers, key = "Controller Model")
 
-        elif st.session_state["Controller Manufacturer"] == 'Avid':
-            controller_field.selectbox("Model", avid_controllers, key = "Controller Model")
+    elif st.session_state["Controller Manufacturer"] == 'Borgwarner':
+        controller_field.selectbox("Model", borgwarner_controllers, key = "Controller Model")
 
-        elif st.session_state["Controller Manufacturer"] == 'Borgwarner':
-            controller_field.selectbox("Model", borgwarner_controllers, key = "Controller Model")
+    elif st.session_state["Controller Manufacturer"] == 'Cascadia':
+        controller_field.selectbox("Model", cascadia_controllers, key = "Controller Model")
 
-        elif st.session_state["Controller Manufacturer"] == 'Cascadia':
-            controller_field.selectbox("Model", cascadia_controllers, key = "Controller Model")
+    elif st.session_state["Controller Manufacturer"] == 'Other':
+        controller_field.text_input("Model")
 
-        elif st.session_state["Controller Manufacturer"] == 'Other':
-            controller_field.text_input("Model")
+    controller_field.selectbox("Sample", samples, key = "Controller Sample")
+    controller_field.text_area("Notes", key = "Controller Notes")
 
-        controller_field.selectbox("Sample", samples, key = "Controller Sample")
-        controller_field.text_area("Notes", key = "Controller Notes")
+    #Motors
+    motor_field.subheader("Motor")
+    motor_field.selectbox("Manufacturer", motor_manufactures, key = "Motor Manufacturer")
 
-        #Motors
-        motor_field.subheader("Motor")
-        motor_field.selectbox("Manufacturer", motor_manufactures, key = "Motor Manufacturer")
+    if st.session_state["Motor Manufacturer"] == 'Turntide':
+        motor_field.selectbox("Model", turntide_motors, key = "Motor Model")
 
-        if st.session_state["Motor Manufacturer"] == 'Turntide':
-            motor_field.selectbox("Model", turntide_motors, key = "Motor Model")
+    elif st.session_state["Motor Manufacturer"] == 'Yasa':
+        motor_field.selectbox("Model", yasa_motors, key = "Motor Model")
 
-        elif st.session_state["Motor Manufacturer"] == 'Yasa':
-            motor_field.selectbox("Model", yasa_motors, key = "Motor Model")
+    elif st.session_state["Motor Manufacturer"] == 'Intergral Powertrain':
+        motor_field.selectbox("Model", ipt_motors, key = "Motor Model")
 
-        elif st.session_state["Motor Manufacturer"] == 'Intergral Powertrain':
-            motor_field.selectbox("Model", ipt_motors, key = "Motor Model")
+    elif st.session_state["Motor Manufacturer"] == 'Other':
+        motor_field.text_input("Model")
 
-        elif st.session_state["Motor Manufacturer"] == 'Other':
-            motor_field.text_input("Model")
-
-        motor_field.selectbox("Sample", samples, key = "Motor Sample")
-        motor_field.text_area("Notes", key = "Motor Notes")
+    motor_field.selectbox("Sample", samples, key = "Motor Sample")
+    motor_field.text_area("Notes", key = "Motor Notes")
 
     return
 
