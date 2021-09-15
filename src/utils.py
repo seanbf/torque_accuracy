@@ -5,15 +5,16 @@ import streamlit as st
 
 @st.cache
 def load_dataframe(uploaded_files):
-    try:
-        df = pd.concat( (pd.read_csv(f) for f in uploaded_files), ignore_index=True)
-    except:
-        df = pd.concat( (pd.read_excel(f) for f in uploaded_files), ignore_index=True)
+    with st.spinner("Generating Dataframe"):
+        try:
+            df = pd.concat( (pd.read_csv(f) for f in uploaded_files), ignore_index=True)
+        except:
+            df = pd.concat( (pd.read_excel(f) for f in uploaded_files), ignore_index=True)
 
-    columns = list(df.columns)
-    columns.append(None)
+        columns = list(df.columns)
+        columns.append(None)
 
-    return df, columns
+        return df, columns
 
 def determine_transients(df, t_demanded, torque_demanded_filter, dwell_period):
     df["Step_Change"] = '0'

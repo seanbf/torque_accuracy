@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import streamlit as st
+from src.colors import qualitive_color_dict
 
 def demanded_plot(data, t_demanded, speed_round):
 
@@ -101,7 +102,7 @@ def transient_removal_plot(transient_sample, Step_index, Stop_index, df, test_di
     return transient_plot
 
 @st.cache
-def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, overlay, overlay_alpha, overlay_color):
+def plot_3D(df, x_string, y_string, z_string, x, y, z, chart_type, color_palette, overlay, overlay_alpha, overlay_color):
     with st.spinner("Generating 3D Plot"):
         label_dict = dict()
         trace_dict = dict()
@@ -241,27 +242,25 @@ def plot_3D(x_string, y_string, z_string, x, y, z, chart_type, color_palette, ov
             label_dict["yaxis"]         = dict(title=y_string)
             #trace_dict["cmid"]          = 0
             #trace_dict["colorscale"]    = color_palette
-        
+    
+        plot_3D.update_layout(label_dict)              
+        plot_3D.update_traces(trace_dict)
+
         if (overlay == True) and (chart_type != "3D Scatter" or "Surface") :
-            plot_3D.add_trace	(go.Scatter (  
-                            x       		= x,
-                            y       		= y,
-                            name 			= "X: "  + x_string + "Y: "  + y_string,
+            st.write(x)
+            st.write(y)
+            plot_3D.add_trace	(go.Scattergl (  
+                            x       		= df[x_string],
+                            y       		= df[y_string],
+                            name 			= "X: "  + x_string + "</br>Y: "  + y_string,
                             mode            = 'markers',
                             opacity         = overlay_alpha,
                             marker          = dict  (
                                                     color   = overlay_color, 
-                                                    symbol  = "circle",
-                                                    line  =dict (
-                                                                    color='MediumPurple',
-                                                                    width=2
-                                                                )
+                                                    symbol  = "circle"
                                                     ),
                             ),     
                 )
-    
-        plot_3D.update_layout(label_dict)              
-        plot_3D.update_traces(trace_dict)
         
         return plot_3D
 
@@ -281,19 +280,22 @@ def plot_pie(df, err_nm, err_pc, limit_nm, limit_pc):
 
     return plot
 
-def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_measured,speed_rpm_round, limit_nm, limit_pc):
+def plot_bowtie(df, t_in, t_in_error_nm, t_in_error_pc, t_measured,speed_rpm_round, limit_nm, limit_pc):
+
+    qual_colors = qualitive_color_dict()
+
     plot_pc = 0
-    plot_pc = df[ (abs(df[t_demanded]) >= limit_nm/(limit_pc/100)) ]
+    plot_pc = df[ (abs(df[t_in]) >= limit_nm/(limit_pc/100)) ]
 
     plot_nm = 0
-    plot_nm = df[ (abs(df[t_demanded]) < limit_nm/(limit_pc/100)) ]
+    plot_nm = df[ (abs(df[t_in]) < limit_nm/(limit_pc/100)) ]
 
     plot = go.Figure()
 
     plot.add_trace(go.Scatter   (  
-                                            x               = plot_pc[t_demanded], 
-                                            y               = plot_pc[t_demanded_error_pc],
-                                            name            = t_demanded_error_pc,
+                                            x               = plot_pc[t_in], 
+                                            y               = plot_pc[t_in_error_pc],
+                                            name            = t_in_error_pc,
                                             customdata      = plot_pc[t_measured],
                                             text            = plot_pc[speed_rpm_round],
                                             hovertemplate   = 'Torque Measured: %{customdata:.2f} Nm' + 
@@ -303,7 +305,7 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                             mode            = "markers",
                                             marker_symbol   = 'circle-dot',
                                             marker          = dict  (
-                                                                    color = "green",
+                                                                    color = qual_colors["Plotly"][1],
                                                                     opacity=0.5,
                                                                     line=dict(
                                                                                 color='black',
@@ -314,8 +316,8 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
 
 
     plot.add_trace(go.Scatter   (  
-                                            x               = plot_nm[t_demanded], 
-                                            y               = plot_nm[t_demanded_error_nm],
+                                            x               = plot_nm[t_in], 
+                                            y               = plot_nm[t_in_error_nm],
                                             name            = "Torque Demanded Error (Nm)",
                                             customdata      = plot_nm[t_measured],
                                             text            = plot_nm[speed_rpm_round],
@@ -326,10 +328,10 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                             mode            = "markers",
                                             marker_symbol   = 'circle-dot',
                                             marker          = dict  (
-                                                                    color = "LightSkyBlue",
+                                                                    color = qual_colors["Plotly"][0],
                                                                     opacity=0.5,
                                                                     line=dict(
-                                                                                color='MediumPurple',
+                                                                                color='black',
                                                                                 width=1
                                                                                 )
                                                                     )
@@ -343,8 +345,8 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                     y1   = limit_nm,
                                     line = dict
                                              (
-                                                color="LightSkyBlue",
-                                                width=1,
+                                                color=qual_colors["Plotly"][0],
+                                                width=2,
                                                 dash="dot",
                                             )
                                     )
@@ -357,8 +359,8 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                     y1   = -1* limit_nm,
                                     line = dict
                                              (
-                                                color="LightSkyBlue",
-                                                width=1,
+                                                color=qual_colors["Plotly"][0],
+                                                width=2,
                                                 dash="dot",
                                             )
                                     )
@@ -371,8 +373,8 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                     y1   = limit_nm,
                                     line = dict
                                              (
-                                                color="LightSkyBlue",
-                                                width=1,
+                                                color=qual_colors["Plotly"][0],
+                                                width=2,
                                                 dash="dot",
                                             )
                                     )
@@ -385,47 +387,77 @@ def plot_bowtie(df, t_demanded, t_demanded_error_nm, t_demanded_error_pc, t_meas
                                     y1   = -1* limit_nm,
                                     line = dict
                                              (
-                                                color="LightSkyBlue",
-                                                width=1,
+                                                color=qual_colors["Plotly"][0],
+                                                width=2,
                                                 dash="dot",
                                             )
                                     )
 
-    plot.add_trace(go.Scatter   (  
-                                            x               = plot_pc[t_demanded], 
-                                            y               = plot_pc[t_demanded]*limit_pc/100,
-                                            name            = "Torque Estimated Error Limit (+%)",
-                                            mode            = "lines", 
-                                            showlegend      = False,                                       
-                                            line=dict(
-                                                        color="green",
-                                                        width=1,
-                                                        dash="dot",
-                                                    )
-                                )           )
+    plot.add_shape(
+                                type = "line",
+                                x0   = limit_nm/(limit_pc/100), 
+                                y0   = min(abs(plot_pc[t_in]))*limit_pc/100, 
+                                x1   = max(abs(plot_pc[t_in])), 
+                                y1   = max(abs(plot_pc[t_in]))*limit_pc/100,
+                                line = dict
+                                            (
+                                            color=qual_colors["Plotly"][1],
+                                            width=2,
+                                            dash="dot",
+                                        )
+                                )
 
-    plot.add_trace(go.Scatter   (  
-                                            x               = plot_pc[t_demanded], 
-                                            y               = plot_pc[t_demanded]*-limit_pc/100,
-                                            name            = "Torque Estimated Error Limit (-%)",
-                                            mode            = "lines",
-                                            showlegend      = False,
-                                            line=dict(
-                                                        color="green",
-                                                        width=1,
-                                                        dash="dot",
-                                                    )
+    plot.add_shape(
+                                type = "line",
+                                x0   = limit_nm/(limit_pc/100), 
+                                y0   = min(abs(plot_pc[t_in]))*-limit_pc/100, 
+                                x1   = max(abs(plot_pc[t_in])), 
+                                y1   = max(abs(plot_pc[t_in]))*-limit_pc/100,
+                                line = dict
+                                            (
+                                            color=qual_colors["Plotly"][1],
+                                            width=2,
+                                            dash="dot",
+                                        )
+                                )
 
-                                )           )
+    plot.add_shape(
+                                type = "line",
+                                x0   = -1*limit_nm/(limit_pc/100), 
+                                y0   = -1*min(abs(plot_pc[t_in]))*limit_pc/100, 
+                                x1   = -1*max(abs(plot_pc[t_in])), 
+                                y1   = -1*max(abs(plot_pc[t_in]))*limit_pc/100,
+                                line = dict
+                                            (
+                                            color=qual_colors["Plotly"][1],
+                                            width=2,
+                                            dash="dot",
+                                        )
+                                )
+
+    plot.add_shape(
+                            type = "line",
+                            x0   = -1*limit_nm/(limit_pc/100), 
+                            y0   = min(abs(plot_pc[t_in]))*limit_pc/100, 
+                            x1   = -1*max(abs(plot_pc[t_in])), 
+                            y1   = max(abs(plot_pc[t_in]))*limit_pc/100,
+                            line = dict
+                                        (
+                                        color=qual_colors["Plotly"][1],
+                                        width=2,
+                                        dash="dot",
+                                    )
+                            )
 
     plot.update_layout  (   
-                                    title       ='Torque Demanded : Measured Error',
-                                    xaxis_title ='Torque Demanded (Nm)',
+                                    title       =str(t_in) + ' & [%] Bowtie',
+                                    xaxis_title = t_in,
                                     yaxis_title ='Torque Error',
                                     xaxis       = dict  (
                                                         tickmode = 'linear',
                                                         tick0 = 0, 
-                                                        dtick = 10
+                                                        dtick = 50
                                                         )
                                     )
+
     return plot

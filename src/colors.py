@@ -33,6 +33,7 @@ def qualitive_color_dict():
                         'Tableau Light'     :TableauLight_10.hex_colors, 
                         'Tableau Medium'    :TableauMedium_10.hex_colors, 
                         'Pastel'            :Pastel_10.hex_colors,
+                        'Plotly'            :px.colors.qualitative.Plotly,
                         'Antique'           :Antique_10.hex_colors, 
                         'Bold'              :Bold_10.hex_colors, 
                         'Prism'             :Prism_10.hex_colors, 
