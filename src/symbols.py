@@ -43,7 +43,11 @@ t_estimated_signals = [
     " tesOutputData.L2mTes_EstTrq.val_MCP",
     "tesOutputData.L2mTes_EstTrq.val_MCP",
     " tesOutputData.L2mTes_EstTrq.val_IOP",
-    "tesOutputData.L2mTes_EstTrq.val_IOP"
+    "tesOutputData.L2mTes_EstTrq.val_IOP",
+    " TesOp_B.L2mTes_EstTrq.val_MCP",
+    "TesOp_B.L2mTes_EstTrq.val_MCP",
+    " TesOp_B.L2mTes_EstTrq.val_IOP",
+    "TesOp_B.L2mTes_EstTrq.val_IOP"
 ]
 
 vdc_symbols = [
@@ -80,7 +84,7 @@ loss_inv_comp_symbols = [
 
 def symbol_auto_select(symbols_in, compared_symbols):
     
-    for signals in compared_symbols:
+    for signals in compared_symbesols:
         try:
             list_index = list(symbols_in).index(signals)
             break

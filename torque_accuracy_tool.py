@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-import markdown as md
-from fpdf import FPDF
 from src.layout import report_details, limits,  limit_format
 from src.utils import load_dataframe, col_removal, determine_transients, sample_transients, transient_removal, round_speeds, torque_error_calc, error_nm_analysis, error_pc_analysis, z_col_or_grid
 from src.plotter import demanded_plot, transient_removal_plot, plot_3D, plot_pie, plot_bowtie
@@ -21,7 +19,7 @@ col_left, col_title, col_right = st.columns(3)
 col_title.title("Torque Accuracy Tool 🎯")
 
 st.write("The Torque Accuracy Tool will plot test data, remove transients and provide analysis on the accuracy of **Torque Output** against **Torque Measured**, in each or all operating quadrants, voltages and speeds.")
-st.write("The tool can also be used to achieve the same analysis with **Estimated Torque**.")
+st.write("The tool can also be used to achieve the same analysis with **Torque Estimated**.")
 st.write("As the tool uses averaging within the analysis, there is an option to remove transients from the data so only steady state data is analysed.")
 
 #strings used for readability
@@ -204,10 +202,14 @@ with st.spinner("Generating Torque Output [Nm] Accuracy Table"):
     t_demanded_error_table_nm, min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, t_d_nm_flag = error_nm_analysis(selected_data, st.session_state["Output Limit [Nm]"], st.session_state["Output Limit [%]"], t_demanded, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_demanded_error_nm, t_demanded_error_pc)
     
     if t_d_nm_flag == True:
-        st.write("✔️ No torque error (%) resulted in surpassing the limits")
+        st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
+        t_d_nm_flag_html = '''<p>No torque error (Nm) resulted in surpassing the limits </p>
+        <p>Upto five of the maximum torque errors shown below</p>'''
+
     else:
         st.write("❌ The following Torque error(s) (Nm) resulted in surpassing the limits")
+        t_d_nm_flag_html = '''The following Torque error(s) (Nm) resulted in surpassing the limits'''
 
     t_dem_err_nm_col1, t_dem_err_nm_col2, t_dem_err_nm_col3 = st.columns(3)
     min_error_demanded_nm_display, average_error_demanded_nm_display, max_error_demanded_nm_display = limit_format(min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, "Output", "Nm")
@@ -223,6 +225,8 @@ with st.spinner("Generating Torque Output [Nm] Accuracy Table"):
 
     st.write(t_demanded_error_table_nm)
 
+    t_demanded_error_table_nm_html= t_demanded_error_table_nm.to_html()
+
 st.subheader("Percentage Error")
 with st.spinner("Generating Torque Output [%] Accuracy Table"):
     st.write("Limit: " + "`± "+str(st.session_state["Output Limit [%]"]) + " %`")
@@ -231,8 +235,12 @@ with st.spinner("Generating Torque Output [%] Accuracy Table"):
     if t_d_pc_flag == True:
         st.write("✔️ No torque error (%) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
+        t_d_pc_flag_html = '''<p>No torque error (%) resulted in surpassing the limits </p>
+        <p>Upto five of the maximum torque errors shown below</p>'''
+
     else:
         st.write("❌ The following Torque error(s) (%) resulted in surpassing the limits")
+        t_d_pc_flag_html = '''The following Torque error(s) (%) resulted in surpassing the limits'''
 
     t_dem_err_pc_col1, t_dem_err_pc_col2, t_dem_err_pc_col3 = st.columns(3)
 
@@ -252,6 +260,8 @@ with st.spinner("Generating Torque Output [%] Accuracy Table"):
 dem_pie = plot_pie(selected_data, selected_data["Torque Demanded Error [Nm]"], selected_data["Torque Demanded Error [%]"], st.session_state["Output Limit [Nm]"],  st.session_state["Output Limit [%]"])
 st.plotly_chart(dem_pie)
 
+
+
 st.markdown("---") 
 
 
@@ -266,10 +276,14 @@ with st.spinner("Generating Torque Estimated [Nm] Accuracy Table"):
     t_estimated_error_table_nm, min_error_estimated_nm, average_error_estimated_nm, max_error_estimated_nm, t_e_nm_flag = error_nm_analysis(selected_data, st.session_state["Estimated Limit [Nm]"], st.session_state["Estimated Limit [%]"], t_estimated, t_demanded, t_estimated, t_measured, speed_round, vdc, idc, t_estimated_error_nm, t_estimated_error_pc)
 
     if t_e_nm_flag == True:
-        st.write("✔️ No torque error (%) resulted in surpassing the limits")
+        st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
+        t_e_nm_flag_html = '''<p>✔️ No torque error (Nm) resulted in surpassing the limits </p>
+        <p>Upto five of the maximum torque errors shown below</p>'''
+
     else:
         st.write("❌ The following Torque error(s) (Nm) resulted in surpassing the limits")
+        t_e_nm_flag_html = '''❌ The following Torque error(s) (Nm) resulted in surpassing the limits'''
 
     t_est_err_nm_col1, t_est_err_nm_col2, t_est_err_nm_col3 = st.columns(3)
 
@@ -295,8 +309,12 @@ with st.spinner("Generating Torque Estimated [%] Accuracy Table"):
     if t_e_pc_flag == True:
         st.write("✔️ No torque error (%) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
+        t_e_pc_flag_html = '''<p>✔️ No torque error (%) resulted in surpassing the limits </p>
+        <p>Upto five of the maximum torque errors shown below</p>'''
+
     else:
         st.write("❌ The following Torque error(s) (%) resulted in surpassing the limits")
+        t_e_pc_flag_html = '''❌ The following Torque error(s) (%) resulted in surpassing the limits'''
 
     t_est_err_pc_col1, t_est_err_pc_col2, t_est_err_pc_col3 = st.columns(3)
     
@@ -315,7 +333,6 @@ with st.spinner("Generating Torque Estimated [%] Accuracy Table"):
 
 est_pie = plot_pie(selected_data, selected_data["Torque Estimated Error [Nm]"], selected_data["Torque Estimated Error [%]"], st.session_state["Estimated Limit [Nm]"],  st.session_state["Estimated Limit [%]"])
 st.plotly_chart(est_pie)
-
 
 
 st.markdown("---")
@@ -378,17 +395,34 @@ t_d_error_nm_ovr2.color_picker("Overlay Color", key = "T_d_error_overlay_color")
 if (st.session_state["plot_demanded_error_bowtie"] == True) and (st.session_state["T_d_error_chart_type"] == "Bowtie"):
     td_bowtie = plot_bowtie(selected_data,t_demanded, t_demanded_error_nm,t_demanded_error_pc, t_measured,speed_round, st.session_state["Output Limit [Nm]"], st.session_state["Output Limit [%]"])
     st.plotly_chart(td_bowtie)
+    td_bowtie_html_string = '''<br><h4> Torque Demanded Error [Nm] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>'''
+    td_bowtie_html_plot = td_bowtie.to_html(default_width = "1200px",default_height = "720px")
+else:
+    td_bowtie_html_string = ""
+    td_bowtie_html_plot = ""
 
 
 if (st.session_state["plot_estimated_error_bowtie"] == True) and (st.session_state["T_d_error_chart_type"] == "Bowtie"):
     te_bowtie = plot_bowtie(selected_data, t_estimated, t_estimated_error_nm,t_estimated_error_pc, t_measured,speed_round, st.session_state["Estimated Limit [Nm]"], st.session_state["Estimated Limit [%]"])
     st.plotly_chart(te_bowtie)
+    te_bowtie_html_string = '''<br><h4> Torque Estimated Error [Nm] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>'''
+    te_bowtie_html_plot = te_bowtie.to_html(default_width = "1200px",default_height = "720px")
+else:
+    te_bowtie_html_string = ""
+    te_bowtie_html_plot = ""
 
 if st.session_state["plot_demanded_error_nm"] == True:
     with st.spinner("Generating Plot"):
         x_td_nm_formatted, y_td_nm_formatted, z_td_nm_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Speed [rpm] Rounded"],selected_data["Torque Demanded [Nm]"], selected_data["Torque Demanded Error [Nm]"])
         t_d_error_nm_plot = plot_3D(selected_data, speed_round,t_demanded,t_demanded_error_nm,x_td_nm_formatted, y_td_nm_formatted, z_td_nm_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
         st.plotly_chart(t_d_error_nm_plot)
+ 
+        t_d_error_nm_html_string = '''<br><h4> Torque Demanded Error [Nm] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>'''
+
+        t_d_error_nm_html_plot = t_d_error_nm_plot.to_html(default_width = "1200px",default_height = "720px")
+else:
+    t_d_error_nm_html_string = ""
+    t_d_error_nm_html_plot = ""
 
 if st.session_state["plot_demanded_error_pc"] == True:
     with st.spinner("Generating Plot"):
@@ -396,17 +430,41 @@ if st.session_state["plot_demanded_error_pc"] == True:
         t_d_error_pc_plot = plot_3D(selected_data, speed_round,t_demanded,t_demanded_error_pc,x_td_pc_formatted, y_td_pc_formatted, z_td_pc_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
         st.plotly_chart(t_d_error_pc_plot)
 
+        t_d_error_pc_html_string = '''<br><h4> Torque Demanded Error [%] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>
+        <br>'''
+
+        t_d_error_pc_html_plot = t_d_error_pc_plot.to_html(default_width = "1200px",default_height = "720px")
+else:
+    t_d_error_pc_html_string = ""
+    t_d_error_pc_html_plot = ""
+
 if st.session_state["plot_estimated_error_nm"] == True:
     with st.spinner("Generating Plot"):
         x_te_nm_formatted, y_te_nm_formatted, z_te_nm_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Speed [rpm] Rounded"],selected_data["Torque Demanded [Nm]"], selected_data["Torque Estimated Error [Nm]"])
         t_e_error_nm_plot = plot_3D(selected_data, speed_round,t_estimated,t_estimated_error_nm,x_te_nm_formatted, y_te_nm_formatted, z_te_nm_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
         st.plotly_chart(t_e_error_nm_plot)
 
+        t_e_error_nm_html_string = '''<br><h4> Torque Estimated Error [Nm] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>
+        <br>'''
+
+        t_e_error_nm_html_plot = t_e_error_nm_plot.to_html(default_width = "1200px",default_height = "720px")
+else:
+    t_e_error_nm_html_string = ""
+    t_e_error_nm_html_plot = ""
+
 if st.session_state["plot_estimated_error_pc"] == True:
     with st.spinner("Generating Plot"):
         x_te_pc_formatted, y_te_pc_formatted, z_te_pc_formatted = z_col_or_grid(st.session_state["T_d_error_chart_type"],  st.session_state["T_d_error_chart_fill"],  st.session_state["T_d_error_chart_method"],  st.session_state["T_d_error_chart_grid"], selected_data["Speed [rpm] Rounded"],selected_data["Torque Demanded [Nm]"], selected_data["Torque Estimated Error [%]"])
         t_e_error_pc_plot = plot_3D(selected_data, speed_round,t_estimated,t_estimated_error_pc, x_te_pc_formatted, y_te_pc_formatted, z_te_pc_formatted, st.session_state["T_d_error_chart_type"], color_palette, overlay, st.session_state["T_d_error_overlay_opacity"], st.session_state["T_d_error_overlay_color"])
         st.plotly_chart(t_e_error_pc_plot)
+
+        t_e_error_pc_html_string = '''<br><h4> Torque Est Error [%] ''' + str(st.session_state["T_d_error_chart_type"]) + ''' </h4>
+        <br>'''
+
+        t_e_error_pc_html_plot = t_e_error_pc_plot.to_html(default_width = "1200px",default_height = "720px")
+else:
+    t_e_error_pc_html_string = ""
+    t_e_error_pc_html_plot = ""
 
 
 st.markdown("---")
@@ -426,6 +484,19 @@ st.markdown("---")
 
 st.header("Report")
 test_dict = report_details()
+
+st.header("Report Appendix Items")
+st.checkbox("Include original dataset",help="Show orginal data as table, If large dataset could take a long time", key = "Report Appendix Full Dataset")
+
+if st.session_state["Report Appendix Full Dataset"] == True:
+    report_appendix_full = '''
+    <br><h4>Full Dataset Table</h4>
+    <br><p>The below table contains all the data uploaded.</p>
+    <br>'''+ dataframe.to_html().replace('<table border="1" class="dataframe">','<table class="table table-sm">') +'''
+    '''
+else: 
+    report_appendix_full = ""
+
 
 test_detail = {
     "Test Name"                 : st.session_state["Test Name"],
@@ -468,62 +539,199 @@ limit_detail = {
     "Esitmated Limit [%]"       : st.session_state["Estimated Limit [%]"]
 }
 
-test_detail_table = pd.DataFrame(data=test_detail,index=[0,1,2])
-#test_detail_table = test_detail_table.astype(str)
-#test_detail_table = test_detail_table.T
-test_detail_table.to_html()
+test_detail_table = pd.DataFrame.from_dict(test_detail,orient='index')
+test_detail_table = test_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
 
-col1, col2, col3 = st.columns(3)
+dyno_detail_table = pd.DataFrame.from_dict(dyno_detail,orient='index')
+dyno_detail_table = dyno_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
 
-html_header = '''
+software_detail_table = pd.DataFrame.from_dict(software_detail,orient='index')
+software_detail_table = software_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+
+controller_detail_table = pd.DataFrame.from_dict(controller_detail,orient='index')
+controller_detail_table = controller_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+
+motor_detail_table = pd.DataFrame.from_dict(motor_detail,orient='index')
+motor_detail_table = motor_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+
+files = []
+for file in uploaded_file:
+    files.append(file.name)
+
+input_files_table = pd.DataFrame(files)
+input_files_table = input_files_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-borderless table-sm table-hover">')
+
+if st.session_state["Remove Transients"] == True:
+    transient_removal_html = ''' 
+    <p>Dwell Period: '''+str(st.session_state["Dwell Period"])+'''</p>'''+'''
+    <p>Torque Demanded Filter : '''+str(st.session_state["Torque Demanded Filter"])+''' Nm </p>'''
+
+else:
+    transient_removal_html = ''' 
+    <p>Not applied</p>
+    '''
+
+if st.session_state["T_d_error_chart_type"] == "Contour":
+    plot_info = '''The below contour plot(s) shows Torque against speed rounded (to the nearest: ''' + str(st.session_state["Speed Base"]) + ''' rpm) 
+    <br>Data between measured data points have been interpolated between the nearest available data using the '''+ str(st.session_state["T_d_error_chart_method"])+''' method.
+    <br>The grid resolution for this contour plot has been set to '''+ str(st.session_state["T_d_error_chart_grid"]) + '''
+    <br>Missing data has been filled with the following value: ''' + str(st.session_state["T_d_error_chart_fill"])+'''
+    '''
+
+elif st.session_state["T_d_error_chart_type"] == "Surface":
+    plot_info = '''The below surface plot(s) shows Torque against speed rounded (to the nearest: ''' + str(st.session_state["Speed Base"]) + ''' rpm) and Torque error
+    <br>Data between measured data points have been interpolated between the nearest available data using the '''+ str(st.session_state["T_d_error_chart_method"])+''' method.
+    <br>The grid resolution for this contour plot has been set to '''+ str(st.session_state["T_d_error_chart_grid"]) + '''
+    <br>Missing data has been filled with the following value: ''' + str(st.session_state["T_d_error_chart_fill"])+'''
+    '''
+
+elif st.session_state["T_d_error_chart_type"] == "Heatmap":
+    plot_info = '''The below heatmap plot(s) shows Torque against speed rounded (to the nearest: ''' + str(st.session_state["Speed Base"]) + ''' rpm)
+    <br>Data between measured data points have been interpolated between the nearest available data using the '''+ str(st.session_state["T_d_error_chart_method"])+''' method.
+    <br>The grid resolution for this contour plot has been set to '''+ str(st.session_state["T_d_error_chart_grid"]) + '''
+    <br>Missing data has been filled with the following value: ''' + str(st.session_state["T_d_error_chart_fill"])+'''
+    '''
+
+elif st.session_state["T_d_error_chart_type"] == "Scatter 3D":
+    plot_info = '''The below 3D Scatter plot(s) shows Torque against speed rounded (to the nearest: ''' + str(st.session_state["Speed Base"]) + ''' rpm) and Torque error'''
+             
+elif st.session_state["T_d_error_chart_type"] == "Bowtie":
+    plot_info = '''The bowtie plot(s) below shows the averaged torque errors and the associated error limits.'''
+
+
+
+
+
+html_string = '''
 <html>
     <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
-        <style>body{ margin:10 100; background:white; }</style>
-    </head>
-    <body>
-        <image src = "https://turntide.com/wp-content/themes/turntide2021/theme/static/images/logo-color.svg"
-        align = "middle"/>
-        <h1>Torque Accuracy Results</h1>
-'''
-
-html_body = '''<html>
-    <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
         <style>body{ margin:100 100; background:white; }</style>
     </head>
     <body>
-        <div class="row text-center">
-            <img src="https://turntide.com/wp-content/themes/turntide2021/theme/static/images/logo-color.svg" style="width: 500px" />
+        <div class="container h-10">
+            <div class="row h-10 justify-content-center align-items-center">
+            <img src="https://turntide.com/wp-content/themes/turntide2021/theme/static/images/logo-color.svg" style="width: 400px" />
+            <br>
+            </div>
         </div>
-        <div class="row text-center">
-            <h1>Torque Accuracy Results</h1>
-        </div>
+
+        <h1 class="text-center">Torque Accuracy Results</h1>
+
+        <br>
 
         <!-- *** Section 1 *** --->
         <h2>Report Details</h2>
-        <h3>Testing</h3>
+        <br>
+            <h4>Testing</h4>
+                '''+ test_detail_table +'''
+                <br>
 
-        <h3>Software</h3>
+            <h4>Software</h4>
+                '''+ software_detail_table +'''
+                <br>
 
-        <h3>Motor</h3>
+            <h4>Motor</h4>
+                '''+ motor_detail_table +'''
+                <br>
 
-        <h3>Inverter</h3>
+            <h4>Controller</h4>
+                '''+ controller_detail_table +'''
+                <br>
 
-        <h3>Dyno</h3>
+            <h4>Dyno</h4>
+                '''+ dyno_detail_table +'''
+                <br>
 
-        <!-- *** Section 2 *** --->
-        <h2>Input Files</h2>
+            <!-- *** Section 2 *** --->
+            <h2>Input Files</h2>
+                '''+ input_files_table +'''
+                <br>
 
+            <h2>Transient Removal</h2> 
+                '''+ transient_removal_html +'''
+                '''+ transient_removal_sample_plot.to_html(default_width = "1200px",default_height = "720px") +'''
+                <br>
+
+            <h2>Unique Points</h2>
+                <p>There are '''+ str(number_of_rounded_speeds)+''' unique speed points identified.</p>
+                <p>There are X unique voltage points indentified.</p>
+                <br>
+
+        <!-- *** Section 3 *** --->
+        <h2>Torque Output Accuracy</h2>
+        <p>Minimum, Mean and Maximum errors are absoluted.</p>
+
+            <br>
+            <h4>Newton Meter Error</h4>
+            <p>Limit:±'''+ str(st.session_state["Output Limit [Nm]"]) +'''Nm</p>
+            ''' + t_d_nm_flag_html + '''
+            <br>
+
+            ''' + t_demanded_error_table_nm.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
+
+            <h4>Percentage Error</h4>
+            <br>
+            <p>Limit:±'''+ str(st.session_state["Output Limit [%]"]) +'''%</p>
+            ''' + t_d_pc_flag_html + '''
+            <br>
+
+            ''' + t_demanded_error_table_pc.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
+            <br>
+
+            <h4> Pass : Fail </h4>
+            ''' + dem_pie.to_html(default_width = "500px",default_height = "500px") + '''
+            <br>
+
+        <h2>Torque Estimated Accuracy</h2>
+
+            <br>
+            <h4>Newton Meter Error</h4>
+            <p>Limit:±'''+ str(st.session_state["Estimated Limit [Nm]"]) +'''Nm</p>
+            ''' + t_e_nm_flag_html + '''
+            <br>
+
+            '''+ t_estimated_error_table_nm.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') +'''
+
+            <h4>Percentage Error</h4>
+            <br>
+
+            <p>Limit:±'''+ str(st.session_state["Estimated Limit [%]"]) +'''%</p>
+            ''' + t_e_pc_flag_html + '''
+            <br>
+
+            '''+ t_estimated_error_table_pc.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') +'''
+            <br>
+
+            <h4> Pass : Fail </h4>
+            '''+est_pie.to_html(default_width = "500px", default_height = "500px")+'''
+            <br>
+
+        <!-- *** Section 4 *** --->
+        <h2>Plots</h2>
+            <p>Selected plots will appear here.</p>          
+            ''' + plot_info + '''
+            ''' + td_bowtie_html_string + '''
+            ''' + td_bowtie_html_plot + '''
+            ''' + te_bowtie_html_string + '''
+            ''' + te_bowtie_html_plot + '''
+            ''' + t_d_error_nm_html_string + '''
+            ''' + t_d_error_nm_html_plot + '''
+            ''' + t_d_error_pc_html_string + '''
+            ''' + t_d_error_pc_html_plot + '''
+
+        <!-- *** Section 4 *** --->
+        <h2>Appendix</h2>
+            <h4>Data analysed as Table</h4> 
+            ''' + selected_data.to_html().replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
+            ''' + report_appendix_full + '''
     </body>
-</html>j'''
-html_footer = '''
-    </body>
-</html>'''
+</html>
+'''
 
-html_string = html_header + html_footer
+bl, report_col ,br = st.columns(3)
 
-btn = st.download_button(
+report_col.download_button(
     label="Download Report",
     data=html_string,
     file_name="myfile.html",
