@@ -84,7 +84,7 @@ loss_inv_comp_symbols = [
 
 def symbol_auto_select(symbols_in, compared_symbols):
     
-    for signals in compared_symbesols:
+    for signals in compared_symbols:
         try:
             list_index = list(symbols_in).index(signals)
             break

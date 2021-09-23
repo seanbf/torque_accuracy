@@ -176,17 +176,17 @@ def limits(analysis_toggle):
 
     if analysis_toggle == "Output":
         st.subheader("Output Limits")
-        st.number_input("QM Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
-        st.number_input("QM Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
+        st.number_input("QM Limit [Nm]",      min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Output Limit [Nm]")
+        st.number_input("QM Limit [%]",       min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Output Limit [%]")
 
     else:
         col_output, col_estimated = st.columns(2)
         col_output.subheader("Output Limits")
-        col_output.number_input("Output Limit [Nm]",      min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [Nm]")
-        col_output.number_input("Output Limit [%]",       min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Output Limit [%]")
+        col_output.number_input("Output Limit [Nm]",      min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Output Limit [Nm]")
+        col_output.number_input("Output Limit [%]",       min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Output Limit [%]")
         col_estimated.subheader("Estimated Limits")
-        col_estimated.number_input("Estimated Limit [Nm]",   min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [Nm]")
-        col_estimated.number_input("Estimated Limit [%]",    min_value = float(-100.0), max_value = float(100.0), value = float(5.0), step = float(1.0), key = "Estimated Limit [%]")
+        col_estimated.number_input("Estimated Limit [Nm]",   min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Estimated Limit [Nm]")
+        col_estimated.number_input("Estimated Limit [%]",    min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Estimated Limit [%]")
     return
 
 def limit_format(min, average, max, limit, unit):

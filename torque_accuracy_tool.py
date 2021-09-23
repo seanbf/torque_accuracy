@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
+
 from src.layout import report_details, limits,  limit_format
 from src.utils import load_dataframe, col_removal, determine_transients, sample_transients, transient_removal, round_speeds, torque_error_calc, error_nm_analysis, error_pc_analysis, z_col_or_grid
 from src.plotter import demanded_plot, transient_removal_plot, plot_3D, plot_pie, plot_bowtie
 from src.colors import sequential_color_dict, diverging_color_dict, plot_color_set
 from src.symbols import symbol_auto_select, speed_rpm_symbols, t_demanded_symbols, t_measured_symbols, t_estimated_signals, vdc_symbols,idc_symbols
-
+import plotly.graph_objects as go
 
 page_config = st.set_page_config(
                                 page_title              ="Torque Accuracy Tool", 
@@ -204,12 +205,16 @@ with st.spinner("Generating Torque Output [Nm] Accuracy Table"):
     if t_d_nm_flag == True:
         st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
-        t_d_nm_flag_html = '''<p>No torque error (Nm) resulted in surpassing the limits </p>
+        t_d_nm_flag_html = '''<p><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
+        <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 2.062l-7.84 9.801a1.473 1.473 0 0 1-2.12.04L.431 8.138a1.473 1.473 0 0 1 2.084-2.083l4.111 4.112 6.82-8.69a.486.486 0 0 1 .04-.045z"/>
+        </svg>No torque error (Nm) resulted in surpassing the limits </p>
         <p>Upto five of the maximum torque errors shown below</p>'''
 
     else:
         st.write("❌ The following Torque error(s) (Nm) resulted in surpassing the limits")
-        t_d_nm_flag_html = '''The following Torque error(s) (Nm) resulted in surpassing the limits'''
+        t_d_nm_flag_html = '''<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+        </svg>The following Torque error(s) (Nm) resulted in surpassing the limits'''
 
     t_dem_err_nm_col1, t_dem_err_nm_col2, t_dem_err_nm_col3 = st.columns(3)
     min_error_demanded_nm_display, average_error_demanded_nm_display, max_error_demanded_nm_display = limit_format(min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, "Output", "Nm")
@@ -235,12 +240,16 @@ with st.spinner("Generating Torque Output [%] Accuracy Table"):
     if t_d_pc_flag == True:
         st.write("✔️ No torque error (%) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
-        t_d_pc_flag_html = '''<p>No torque error (%) resulted in surpassing the limits </p>
+        t_d_pc_flag_html = '''<p><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
+        <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 2.062l-7.84 9.801a1.473 1.473 0 0 1-2.12.04L.431 8.138a1.473 1.473 0 0 1 2.084-2.083l4.111 4.112 6.82-8.69a.486.486 0 0 1 .04-.045z"/>
+        </svg>No torque error (%) resulted in surpassing the limits </p>
         <p>Upto five of the maximum torque errors shown below</p>'''
 
     else:
         st.write("❌ The following Torque error(s) (%) resulted in surpassing the limits")
-        t_d_pc_flag_html = '''The following Torque error(s) (%) resulted in surpassing the limits'''
+        t_d_pc_flag_html = '''<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+        </svg>The following Torque error(s) (%) resulted in surpassing the limits'''
 
     t_dem_err_pc_col1, t_dem_err_pc_col2, t_dem_err_pc_col3 = st.columns(3)
 
@@ -278,12 +287,16 @@ with st.spinner("Generating Torque Estimated [Nm] Accuracy Table"):
     if t_e_nm_flag == True:
         st.write("✔️ No torque error (Nm) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
-        t_e_nm_flag_html = '''<p>✔️ No torque error (Nm) resulted in surpassing the limits </p>
+        t_e_nm_flag_html = '''<p><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
+        <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 2.062l-7.84 9.801a1.473 1.473 0 0 1-2.12.04L.431 8.138a1.473 1.473 0 0 1 2.084-2.083l4.111 4.112 6.82-8.69a.486.486 0 0 1 .04-.045z"/>
+        </svg> No torque error (Nm) resulted in surpassing the limits </p>
         <p>Upto five of the maximum torque errors shown below</p>'''
 
     else:
         st.write("❌ The following Torque error(s) (Nm) resulted in surpassing the limits")
-        t_e_nm_flag_html = '''❌ The following Torque error(s) (Nm) resulted in surpassing the limits'''
+        t_e_nm_flag_html = '''<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+        </svg> The following Torque error(s) (Nm) resulted in surpassing the limits'''
 
     t_est_err_nm_col1, t_est_err_nm_col2, t_est_err_nm_col3 = st.columns(3)
 
@@ -309,12 +322,16 @@ with st.spinner("Generating Torque Estimated [%] Accuracy Table"):
     if t_e_pc_flag == True:
         st.write("✔️ No torque error (%) resulted in surpassing the limits")
         st.write("Upto five of the maximum torque errors shown below")
-        t_e_pc_flag_html = '''<p>✔️ No torque error (%) resulted in surpassing the limits </p>
+        t_e_pc_flag_html = '''<p><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-check-lg" viewBox="0 0 16 16">
+        <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 2.062l-7.84 9.801a1.473 1.473 0 0 1-2.12.04L.431 8.138a1.473 1.473 0 0 1 2.084-2.083l4.111 4.112 6.82-8.69a.486.486 0 0 1 .04-.045z"/>
+        </svg> No torque error (%) resulted in surpassing the limits </p>
         <p>Upto five of the maximum torque errors shown below</p>'''
 
     else:
         st.write("❌ The following Torque error(s) (%) resulted in surpassing the limits")
-        t_e_pc_flag_html = '''❌ The following Torque error(s) (%) resulted in surpassing the limits'''
+        t_e_pc_flag_html = '''<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="red" class="bi bi-x-lg" viewBox="0 0 16 16">
+        <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+        </svg> The following Torque error(s) (%) resulted in surpassing the limits'''
 
     t_est_err_pc_col1, t_est_err_pc_col2, t_est_err_pc_col3 = st.columns(3)
     
@@ -539,20 +556,33 @@ limit_detail = {
     "Esitmated Limit [%]"       : st.session_state["Estimated Limit [%]"]
 }
 
-test_detail_table = pd.DataFrame.from_dict(test_detail,orient='index')
-test_detail_table = test_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+test_detail_tablez = pd.DataFrame.from_dict(test_detail,orient='index')
+
+test_detail_table = go.Figure(data=[go.Table(
+    header=dict(values=list(test_detail_tablez.columns),
+                fill_color='paleturquoise',
+                align='left'),
+    cells=dict(values=test_detail_tablez.transpose().values.tolist(),
+               fill_color='lavender',
+               align='left'))
+])
+
+test_detail_table = test_detail_table.to_html()
+
+
+#test_detail_table = test_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0", col_space=10)
 
 dyno_detail_table = pd.DataFrame.from_dict(dyno_detail,orient='index')
-dyno_detail_table = dyno_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+dyno_detail_table = dyno_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
 
 software_detail_table = pd.DataFrame.from_dict(software_detail,orient='index')
-software_detail_table = software_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+software_detail_table = software_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
 
 controller_detail_table = pd.DataFrame.from_dict(controller_detail,orient='index')
-controller_detail_table = controller_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+controller_detail_table = controller_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
 
 motor_detail_table = pd.DataFrame.from_dict(motor_detail,orient='index')
-motor_detail_table = motor_detail_table.to_html(header=False).replace('<table border="1" class="dataframe">','<table class="table table-sm">')
+motor_detail_table = motor_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
 
 files = []
 for file in uploaded_file:
@@ -664,19 +694,19 @@ html_string = '''
 
             <br>
             <h4>Newton Meter Error</h4>
-            <p>Limit:±'''+ str(st.session_state["Output Limit [Nm]"]) +'''Nm</p>
+            <p>Limit:&plusmn'''+ str(st.session_state["Output Limit [Nm]"]) +'''Nm</p>
             ''' + t_d_nm_flag_html + '''
             <br>
 
-            ''' + t_demanded_error_table_nm.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
+            ''' + t_demanded_error_table_nm.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") + '''
 
             <h4>Percentage Error</h4>
             <br>
-            <p>Limit:±'''+ str(st.session_state["Output Limit [%]"]) +'''%</p>
+            <p>Limit:&plusmn'''+ str(st.session_state["Output Limit [%]"]) +'''%</p>
             ''' + t_d_pc_flag_html + '''
             <br>
 
-            ''' + t_demanded_error_table_pc.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
+            ''' + t_demanded_error_table_pc.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") + '''
             <br>
 
             <h4> Pass : Fail </h4>
@@ -687,20 +717,20 @@ html_string = '''
 
             <br>
             <h4>Newton Meter Error</h4>
-            <p>Limit:±'''+ str(st.session_state["Estimated Limit [Nm]"]) +'''Nm</p>
+            <p>Limit:&plusmn'''+ str(st.session_state["Estimated Limit [Nm]"]) +'''Nm</p>
             ''' + t_e_nm_flag_html + '''
             <br>
 
-            '''+ t_estimated_error_table_nm.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') +'''
+            '''+ t_estimated_error_table_nm.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") +'''
 
             <h4>Percentage Error</h4>
             <br>
 
-            <p>Limit:±'''+ str(st.session_state["Estimated Limit [%]"]) +'''%</p>
+            <p>Limit:&plusmn'''+ str(st.session_state["Estimated Limit [%]"]) +'''%</p>
             ''' + t_e_pc_flag_html + '''
             <br>
 
-            '''+ t_estimated_error_table_pc.to_html(index=False).replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') +'''
+            '''+ t_estimated_error_table_pc.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") +'''
             <br>
 
             <h4> Pass : Fail </h4>
