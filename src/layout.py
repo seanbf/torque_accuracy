@@ -189,18 +189,18 @@ def limits(analysis_toggle):
         col_estimated.number_input("Estimated Limit [%]",    min_value = -100.0, max_value = 100.0, value = 5.0, step = 1.0, key = "Estimated Limit [%]")
     return
 
-def limit_format(min, average, max, limit, unit):
-    if min > st.session_state[limit + " Limit [" + unit + "]"]:
+def limit_format(flag, min, average, max, limit, unit):
+    if min > st.session_state[limit + " Limit [" + unit + "]"] and flag == False:
         min_error_display = '<p style="font-family:sans-serif; color:Red; font-size: 24px;">'+str(round(min, 3)) + unit +'</p>'
     else:
         min_error_display = '<p style="font-family:sans-serif; color:Green; font-size: 24px;">'+str(round(min, 3))+ unit +'</p>'
 
-    if average > st.session_state[limit + " Limit [" + unit + "]"]:
+    if average > st.session_state[limit + " Limit [" + unit + "]"] and flag == False:
         avg_error_display = '<p style="font-family:sans-serif; color:Red; font-size: 24px;">'+str(round(average, 3)) + unit +'</p>'
     else:
         avg_error_display = '<p style="font-family:sans-serif; color:Green; font-size: 24px;">'+str(round(average, 3))+ unit +'</p>'
 
-    if max > st.session_state[limit + " Limit [" + unit + "]"]:
+    if max > st.session_state[limit + " Limit [" + unit + "]"] and flag == False:
         max_error_display = '<p style="font-family:sans-serif; color:Red; font-size: 24px;">'+str(round(max, 3)) + unit +'</p>'
     else:
         max_error_display = '<p style="font-family:sans-serif; color:Green; font-size: 24px;">'+str(round(max, 3))+ unit +'</p>'

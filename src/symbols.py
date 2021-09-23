@@ -44,10 +44,10 @@ t_estimated_signals = [
     "tesOutputData.L2mTes_EstTrq.val_MCP",
     " tesOutputData.L2mTes_EstTrq.val_IOP",
     "tesOutputData.L2mTes_EstTrq.val_IOP",
-    " TesOp_B.L2mTes_EstTrq.val_MCP",
-    "TesOp_B.L2mTes_EstTrq.val_MCP",
-    " TesOp_B.L2mTes_EstTrq.val_IOP",
-    "TesOp_B.L2mTes_EstTrq.val_IOP"
+    " TesOp_B.L2mTes_EstTrq_MCP",
+    "TesOp_B.L2mTes_EstTrq_MCP",
+    " TesOp_B.L2mTes_EstTrq_IOP",
+    "TesOp_B.L2mTes_EstTrq_IOP"
 ]
 
 vdc_symbols = [
@@ -58,7 +58,7 @@ vdc_symbols = [
     "tesInputData.L2mSensVdc_Vdc_MCP",
     " tesInputData.L2mSensVdc_Vdc_MCP",
     "tesInputData.L2mSensVdc_Vdc_IOP",
-    " tesInputData.L2mSensVdc_Vdc_IOP"
+    " tesInputData.L2mSensVdc_Vdc_IOP",
 ]
 
 idc_symbols = [

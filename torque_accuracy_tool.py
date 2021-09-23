@@ -217,7 +217,7 @@ with st.spinner("Generating Torque Output [Nm] Accuracy Table"):
         </svg>The following Torque error(s) (Nm) resulted in surpassing the limits'''
 
     t_dem_err_nm_col1, t_dem_err_nm_col2, t_dem_err_nm_col3 = st.columns(3)
-    min_error_demanded_nm_display, average_error_demanded_nm_display, max_error_demanded_nm_display = limit_format(min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, "Output", "Nm")
+    min_error_demanded_nm_display, average_error_demanded_nm_display, max_error_demanded_nm_display = limit_format(t_d_nm_flag, min_error_demanded_nm, average_error_demanded_nm, max_error_demanded_nm, "Output", "Nm")
 
     t_dem_err_nm_col1.subheader("Minimum Error")
     t_dem_err_nm_col1.markdown(min_error_demanded_nm_display, unsafe_allow_html=True)
@@ -253,7 +253,7 @@ with st.spinner("Generating Torque Output [%] Accuracy Table"):
 
     t_dem_err_pc_col1, t_dem_err_pc_col2, t_dem_err_pc_col3 = st.columns(3)
 
-    min_error_demanded_pc_display, average_error_demanded_pc_display, max_error_demanded_pc_display = limit_format(min_error_demanded_pc, average_error_demanded_pc, max_error_demanded_pc, "Output", "%")
+    min_error_demanded_pc_display, average_error_demanded_pc_display, max_error_demanded_pc_display = limit_format(t_d_pc_flag, min_error_demanded_pc, average_error_demanded_pc, max_error_demanded_pc, "Output", "%")
 
     t_dem_err_pc_col1.subheader("Minimum Error")
     t_dem_err_pc_col1.markdown(min_error_demanded_pc_display, unsafe_allow_html=True)
@@ -300,7 +300,7 @@ with st.spinner("Generating Torque Estimated [Nm] Accuracy Table"):
 
     t_est_err_nm_col1, t_est_err_nm_col2, t_est_err_nm_col3 = st.columns(3)
 
-    min_error_estimated_nm_display, average_error_estimated_nm_display, max_error_estimated_nm_display = limit_format(min_error_estimated_nm, average_error_estimated_nm, max_error_estimated_nm, "Estimated", "Nm")
+    min_error_estimated_nm_display, average_error_estimated_nm_display, max_error_estimated_nm_display = limit_format(t_e_nm_flag, min_error_estimated_nm, average_error_estimated_nm, max_error_estimated_nm, "Estimated", "Nm")
 
     t_est_err_nm_col1.subheader("Minimum Error")
     t_est_err_nm_col1.markdown(min_error_estimated_nm_display, unsafe_allow_html=True)
@@ -335,7 +335,7 @@ with st.spinner("Generating Torque Estimated [%] Accuracy Table"):
 
     t_est_err_pc_col1, t_est_err_pc_col2, t_est_err_pc_col3 = st.columns(3)
     
-    min_error_estimated_pc_display, average_error_estimated_pc_display, max_error_estimated_pc_display = limit_format(min_error_estimated_pc, average_error_estimated_pc, max_error_estimated_pc, "Estimated", "%")
+    min_error_estimated_pc_display, average_error_estimated_pc_display, max_error_estimated_pc_display = limit_format(t_e_pc_flag, min_error_estimated_pc, average_error_estimated_pc, max_error_estimated_pc, "Estimated", "%")
 
     t_est_err_pc_col1.subheader("Minimum Error")
     t_est_err_pc_col1.markdown(min_error_estimated_pc_display, unsafe_allow_html=True)
@@ -515,75 +515,6 @@ else:
     report_appendix_full = ""
 
 
-test_detail = {
-    "Test Name"                 : st.session_state["Test Name"],
-    "User"                      : st.session_state["User"],
-    "Test Date"                 : st.session_state["Test Date"],
-    "Test Note"                 : st.session_state["Test Note"]
-}
-
-dyno_detail = {
-    "Dyno"                      : st.session_state["Dyno"],
-    "Torque Speed Sensor"       : st.session_state["Torque Speed Sensor"],
-    "Sensor Calibration Date"   : st.session_state["Sensor Calibration Date"]
-}
-
-software_detail = {
-    "Software Level"            : st.session_state["Software Level"],
-    "Software Location"         : st.session_state["Software Location"],
-    "Software Notes"            : st.session_state["Software Notes"]
-}
-
-controller_detail = {
-    "Controller Manufacturer"   : st.session_state["Controller Manufacturer"],
-    "Controller Model"          : st.session_state["Controller Model"],
-    "Controller Sample"         : st.session_state["Controller Sample"],
-    "Controller Notes"          : st.session_state["Controller Notes"]
-}
-
-motor_detail = {
-    "Motor Manufacturer"        : st.session_state["Motor Manufacturer"],
-    "Motor Model"               : st.session_state["Motor Model"],
-    "Motor Sample"              : st.session_state["Motor Sample"],
-    "Motor Notes"               : st.session_state["Motor Notes"]
-
-}
-
-limit_detail = {
-    "Output Limit [Nm]"         : st.session_state["Output Limit [Nm]"],
-    "Output Limit [%]"          : st.session_state["Output Limit [%]"],
-    "Estimated Limit [Nm]"      : st.session_state["Estimated Limit [Nm]"],
-    "Esitmated Limit [%]"       : st.session_state["Estimated Limit [%]"]
-}
-
-test_detail_tablez = pd.DataFrame.from_dict(test_detail,orient='index')
-
-test_detail_table = go.Figure(data=[go.Table(
-    header=dict(values=list(test_detail_tablez.columns),
-                fill_color='paleturquoise',
-                align='left'),
-    cells=dict(values=test_detail_tablez.transpose().values.tolist(),
-               fill_color='lavender',
-               align='left'))
-])
-
-test_detail_table = test_detail_table.to_html()
-
-
-#test_detail_table = test_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0", col_space=10)
-
-dyno_detail_table = pd.DataFrame.from_dict(dyno_detail,orient='index')
-dyno_detail_table = dyno_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
-
-software_detail_table = pd.DataFrame.from_dict(software_detail,orient='index')
-software_detail_table = software_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
-
-controller_detail_table = pd.DataFrame.from_dict(controller_detail,orient='index')
-controller_detail_table = controller_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
-
-motor_detail_table = pd.DataFrame.from_dict(motor_detail,orient='index')
-motor_detail_table = motor_detail_table.to_html(header=False, classes='table text-left', justify='left', border="0")
-
 files = []
 for file in uploaded_file:
     files.append(file.name)
@@ -646,7 +577,7 @@ html_string = '''
             </div>
         </div>
 
-        <h1 class="text-center">Torque Accuracy Results</h1>
+        <h1 class="display-1 text-center">Torque Accuracy Results</h1>
 
         <br>
 
@@ -654,24 +585,122 @@ html_string = '''
         <h2>Report Details</h2>
         <br>
             <h4>Testing</h4>
-                '''+ test_detail_table +'''
+
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Test Name</th>
+                  <td>'''+ str(st.session_state["Test Name"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>User</th>
+                  <td>'''+ str(st.session_state["User"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Test Date</th>
+                  <td>'''+ str(st.session_state["Test Date"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Test Note</th>
+                  <td>'''+ str(st.session_state["Test Note"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+
+
                 <br>
 
             <h4>Software</h4>
-                '''+ software_detail_table +'''
-                <br>
+
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Dyno</th>
+                  <td>'''+ str(st.session_state["Dyno"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Torque Speed Sensor</th>
+                  <td>'''+ str(st.session_state["Torque Speed Sensor"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Sensor Calibration Date</th>
+                  <td>'''+ str(st.session_state["Sensor Calibration Date"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
 
             <h4>Motor</h4>
-                '''+ motor_detail_table +'''
-                <br>
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Software Level</th>
+                  <td>'''+ str(st.session_state["Software Level"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Software Location</th>
+                  <td>'''+ str(st.session_state["Software Location"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Software Notes</th>
+                  <td>'''+ str(st.session_state["Software Notes"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
 
             <h4>Controller</h4>
-                '''+ controller_detail_table +'''
-                <br>
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Controller Manufacturer</th>
+                  <td>'''+ str(st.session_state["Controller Manufacturer"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Controller Model</th>
+                  <td>'''+ str(st.session_state["Controller Model"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Controller Sample</th>
+                  <td>'''+ str(st.session_state["Controller Sample"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Controller Notes</th>
+                  <td>'''+ str(st.session_state["Controller Notes"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
 
             <h4>Dyno</h4>
-                '''+ dyno_detail_table +'''
-                <br>
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Motor Manufacturer</th>
+                  <td>'''+ str(st.session_state["Motor Manufacturer"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Motor Model</th>
+                  <td>'''+ str(st.session_state["Motor Model"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Motor Sample</th>
+                  <td>'''+ str(st.session_state["Motor Sample"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Motor Notes</th>
+                  <td>'''+ str(st.session_state["Motor Notes"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+
+            <h4>Limits</h4>
+            <table class="table">
+              <tbody>
+                <tr>
+                <th scope="row", width = 300>Output [Nm]</th>
+                  <td>'''+ str(st.session_state["Output Limit [Nm]"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Output [%]</th>
+                  <td>'''+ str(st.session_state["Output Limit [%]"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Estimated [Nm]</th>
+                  <td>'''+ str(st.session_state["Estimated Limit [Nm]"]) + '''</td>
+                </tr>
+                <th scope="row", width = 300>Estimated [%]</th>
+                  <td>'''+ str(st.session_state["Estimated Limit [%]"]) + '''</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
 
             <!-- *** Section 2 *** --->
             <h2>Input Files</h2>
@@ -696,21 +725,67 @@ html_string = '''
             <h4>Newton Meter Error</h4>
             <p>Limit:&plusmn'''+ str(st.session_state["Output Limit [Nm]"]) +'''Nm</p>
             ''' + t_d_nm_flag_html + '''
-            <br>
+            
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Minimum</th>
+                  <th scope="col">Mean</th>
+                  <th scope="col">Maximum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>''' + min_error_demanded_nm_display + '''</td>
+                  <td>''' + average_error_demanded_nm_display + '''</td>
+                  <td>''' + max_error_demanded_nm_display + '''</td>
+                </tr>
+              </tbody>
+            </table>
 
             ''' + t_demanded_error_table_nm.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") + '''
-
-            <h4>Percentage Error</h4>
             <br>
+            <h4>Percentage Error</h4>
+            
             <p>Limit:&plusmn'''+ str(st.session_state["Output Limit [%]"]) +'''%</p>
             ''' + t_d_pc_flag_html + '''
-            <br>
+            
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Minimum</th>
+                  <th scope="col">Mean</th>
+                  <th scope="col">Maximum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>''' + min_error_demanded_pc_display + '''</td>
+                  <td>''' + average_error_demanded_pc_display + '''</td>
+                  <td>''' + max_error_demanded_pc_display + '''</td>
+                </tr>
+              </tbody>
+            </table>
 
             ''' + t_demanded_error_table_pc.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") + '''
             <br>
 
             <h4> Pass : Fail </h4>
-            ''' + dem_pie.to_html(default_width = "500px",default_height = "500px") + '''
+
+            <div class="container">
+            <div class="row">
+                <div class="col align-self-start">
+                
+                </div>
+                <div class="col align-self-center">
+                ''' + dem_pie.to_html(default_width = "500px",default_height = "500px") + '''
+                </div>
+                <div class="col align-self-end">
+                
+                </div>
+            </div>
+            </div> 
+
             <br>
 
         <h2>Torque Estimated Accuracy</h2>
@@ -719,39 +794,151 @@ html_string = '''
             <h4>Newton Meter Error</h4>
             <p>Limit:&plusmn'''+ str(st.session_state["Estimated Limit [Nm]"]) +'''Nm</p>
             ''' + t_e_nm_flag_html + '''
-            <br>
+            
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Minimum</th>
+                  <th scope="col">Mean</th>
+                  <th scope="col">Maximum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>''' + min_error_estimated_nm_display + '''</td>
+                  <td>''' + average_error_estimated_nm_display + '''</td>
+                  <td>''' + max_error_estimated_nm_display + '''</td>
+                </tr>
+              </tbody>
+            </table>
 
             '''+ t_estimated_error_table_nm.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") +'''
 
-            <h4>Percentage Error</h4>
             <br>
+            <h4>Percentage Error</h4>
 
             <p>Limit:&plusmn'''+ str(st.session_state["Estimated Limit [%]"]) +'''%</p>
             ''' + t_e_pc_flag_html + '''
-            <br>
+            
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Minimum</th>
+                  <th scope="col">Mean</th>
+                  <th scope="col">Maximum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>''' + min_error_estimated_pc_display + '''</td>
+                  <td>''' + average_error_estimated_pc_display + '''</td>
+                  <td>''' + max_error_estimated_pc_display + '''</td>
+                </tr>
+              </tbody>
+            </table>
 
             '''+ t_estimated_error_table_pc.to_html(index=False, classes='table table-striped table-sm text-right', justify='center', border="0") +'''
             <br>
 
             <h4> Pass : Fail </h4>
-            '''+est_pie.to_html(default_width = "500px", default_height = "500px")+'''
-            <br>
+            <div class="container">
+            <div class="row">
+                <div class="col align-self-start">
+                
+                </div>
+                <div class="col align-self-center">
+                ''' + est_pie.to_html(default_width = "500px",default_height = "500px") + '''
+                </div>
+                <div class="col align-self-end">
+                
+                </div>
+            </div>
+            </div> 
 
         <!-- *** Section 4 *** --->
         <h2>Plots</h2>
-            <p>Selected plots will appear here.</p>          
-            ''' + plot_info + '''
-            ''' + td_bowtie_html_string + '''
-            ''' + td_bowtie_html_plot + '''
-            ''' + te_bowtie_html_string + '''
-            ''' + te_bowtie_html_plot + '''
-            ''' + t_d_error_nm_html_string + '''
-            ''' + t_d_error_nm_html_plot + '''
-            ''' + t_d_error_pc_html_string + '''
-            ''' + t_d_error_pc_html_plot + '''
+            <p>Selected plots will appear here.</p>  
 
+            <div class="container">
+            <div class="row">
+                <div class="col align-self-start">
+                
+                </div>
+                <div class="col align-self-center">
+                ''' + dem_pie.to_html(default_width = "500px",default_height = "500px") + '''
+                </div>
+                <div class="col align-self-end">
+                
+                </div>
+            </div>
+        </div>         
+            ''' + plot_info + '''
+  
+                    ''' + td_bowtie_html_string + '''
+            <div class="container">
+                <div class="row">
+                    <div class="col align-self-start">
+
+                    </div>
+                    <div class="col align-self-center">
+                    ''' + td_bowtie_html_plot + '''
+                    </div>
+                    <div class="col align-self-end">
+
+                    </div>
+                </div>
+            </div>
+
+            ''' + te_bowtie_html_string + '''
+            <div class="container">
+                <div class="row">
+                    <div class="col align-self-start">
+
+                    </div>
+                    <div class="col align-self-center">
+                    ''' + te_bowtie_html_plot + '''
+                    </div>
+                    <div class="col align-self-end">
+
+                    </div>
+                </div>
+            </div>
+
+            ''' + t_d_error_nm_html_string + '''
+            <div class="container">
+                <div class="row">
+                    <div class="col align-self-start">
+
+                    </div>
+                    <div class="col align-self-center">
+                    ''' + t_d_error_nm_html_plot + '''
+                    </div>
+                    <div class="col align-self-end">
+
+                    </div>
+                </div>
+            </div>
+
+            ''' + t_d_error_pc_html_string + '''
+            <div class="container">
+                <div class="row">
+                    <div class="col align-self-start">
+
+                    </div>
+                    <div class="col align-self-center">
+                    ''' + t_d_error_pc_html_plot + '''
+                    </div>
+                    <div class="col align-self-end">
+
+                    </div>
+                </div>
+            </div>
+            
+        
         <!-- *** Section 4 *** --->
+        <br>
         <h2>Appendix</h2>
+        <br>
             <h4>Data analysed as Table</h4> 
             ''' + selected_data.to_html().replace('<table border="1" class="dataframe">','<table class="table table-striped table-sm">') + '''
             ''' + report_appendix_full + '''
