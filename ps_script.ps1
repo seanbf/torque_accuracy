@@ -128,7 +128,7 @@ Write-Host "Adding environment extentions and paths"
 Add-EnvExtension '.PY'
 Add-EnvExtension '.PYW'
 Add-EnvPath $targetDir
-Add-EnvPath $targetDir+"\Scripts"
+Add-EnvPath $targetDir+"\Scripts\"
 Write-Host $message
 
 Write-Host "Installing Dependancies"
