@@ -7,9 +7,9 @@
 ## Installation
 
 <br>`install.bat` is a batch file that allows the user to select from 2 installation choices.
-- Option [1]: Install Python 3.9.5, Paths, Dependancies and Launch torque_accuracy_tool
+- **Option [1]: Install Python 3.9.5, Paths, Dependancies and Launch torque_accuracy_tool**
 <br>Using option [1] will launch a powershell script to install Python 3.9.5, all the dependencies required by torque_accuracy_tool and then launch the tool in a web browser
-- Option [2]: Install Dependancies and Launch torque_accuracy_tool
+- **Option [2]: Install Dependancies and Launch torque_accuracy_tool**
 <br>Using option [2] will bypass the python installation and just install all the dependencies (presuming it is installed and has the correct paths) required by torque_accuracy_tool and then launch the tool in a web browser.
 <br>Once installtion is complete the tool will already be launched, and can be relaunched using `torque_accuracy_tool.bat`
 
