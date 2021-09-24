@@ -1,5 +1,7 @@
 
 $curDir = $PSScriptRoot
+$curUser = $env:UserName
+
 Write-Host "Installing Python 3.9.5, Paths, Dependancies and Launching torque_accuracy_tool"
 Write-Host "Current Working Directory: $curDir"
 # This is the link to download Python 3.6.7 from Python.org
@@ -12,9 +14,8 @@ $tempDirectory = "C:\temp_provision\"
 
 # Installation Directory
 # Some packages look for Python here
-$targetDir = "C:\Python39"
-
-Write-Host "Checking for Python 3.9.5"
+$targetDir = "C:\Users\"+$curUser+"\AppData\Local\Programs\Python\Python39"
+Write-Host "Checking for Python 3.9.5 in" $targetDir
 # create the download directory and get the exe file
 $pythonNameLoc = $tempDirectory + "python395.exe"
 New-Item -ItemType directory -Path $tempDirectory -Force | Out-Null
@@ -90,7 +91,6 @@ Param (
     {
         $message = 'Path extension already exists'
     }
-    Write-Information $message
 }
 
 Function Get-EnvPathList {
@@ -115,6 +115,7 @@ Param (
         [System.Environment]::SetEnvironmentVariable('path', $returnPath, [System.EnvironmentVariableTarget]::Process)
         [System.Environment]::SetEnvironmentVariable('path', $returnPath, [System.EnvironmentVariableTarget]::User)
         $message = "Path added to machine, process and user paths to include $pathToAdd"
+		Write-Host $returnPath
     }
     else
     {
@@ -126,16 +127,17 @@ Param (
 Write-Host "Adding environment extentions and paths"
 Add-EnvExtension '.PY'
 Add-EnvExtension '.PYW'
-Add-EnvPath 'C:\Python39\'
+Add-EnvPath $targetDir
+Write-Host $message
+
 
 Write-Host "Installing Dependancies"
 # Install a library using Pip
-python -m ensurepip
-python -m pip install --user --upgrade pip
+py -3.9 -m ensurepip
+py -3.9 -m pip install --user --upgrade pip
 
 
 Write-Host "Launching torque_accuracy_tool"
 Set-Location $curDir
-python -m pip install -r requirements.txt
-python where
-python -m streamlit run torque_accuracy_tool.py
+py -3.9 -m pip install -r requirements.txt
+py -3.9 -m streamlit run torque_accuracy_tool.py

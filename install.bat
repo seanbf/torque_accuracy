@@ -15,6 +15,7 @@ ECHO.
 
 set choice=
 set /p choice=Type the [number] of the option you want to use.
+ECHO. 
 
 if not '%choice%'=='' set choice=%choice:~0,1%
 if '%choice%'=='1' goto install_full
@@ -31,8 +32,8 @@ goto end
 
 :install_dep
 ECHO Installing Dependancies and Launching torque_accuracy_tool
-python -m pip install -r requirements.txt
-python -m streamlit run torque_accuracy_tool.py
+py -3.9 -m pip install -r requirements.txt
+py -3.9 -m streamlit run torque_accuracy_tool.py
 goto end
 
 :end
