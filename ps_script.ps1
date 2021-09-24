@@ -27,7 +27,7 @@ Write-Host "Downloading Python 3.9.5"
 # See https://docs.python.org/3/using/windows.html
 $Arguments = @()
 $Arguments += "/i"
-$Arguments += 'InstallAllUsers=0 Include_launcher=0 Include_test=0'
+$Arguments += 'InstallAllUsers=0 Include_launcher=1 Include_test=0'
 $Arguments += "/passive"
 
 #Install Python
