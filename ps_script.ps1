@@ -14,7 +14,7 @@ $tempDirectory = "C:\temp_provision\"
 
 # Installation Directory
 # Some packages look for Python here
-$targetDir = "C:\Users\"+$curUser+"\AppData\Local\Programs\Python\Python39"
+$targetDir = "C:\Users\"+$curUser+"\AppData\Local\Programs\Python\Python39\"
 Write-Host "Checking for Python 3.9.5 in" $targetDir
 # create the download directory and get the exe file
 $pythonNameLoc = $tempDirectory + "python395.exe"
