@@ -2,7 +2,7 @@
 $curDir = $PSScriptRoot
 $curUser = $env:UserName
 
-Write-Host "Installing Python 3.7.4, Paths, Dependancies and Launching xPlot"
+Write-Host "Installing Python 3.7.4, Paths, Dependancies and Launching Torque Accuracy Tool"
 Write-Host "Current Working Directory: $curDir"
 # This is the link to download Python 3.7.4 from Python.org
 # See https://www.python.org/downloads/
@@ -14,7 +14,7 @@ $tempDirectory = "C:\temp_provision\"
 
 # Installation Directory
 # Some packages look for Python here
-$targetDir = "C:\Users\gatdyno\AppData\Local\Programs\Python\Python37-32"
+$targetDir = "C:\Users\$curUser\AppData\Local\Programs\Python\Python37"
 Write-Host "Checking for Python 3.7.4 in" $targetDir
 # create the download directory and get the exe file
 $pythonNameLoc = $tempDirectory + "python-3.7.4-amd64.exe"
@@ -140,4 +140,4 @@ py -3.7 -m pip install --user --upgrade pip
 Write-Host "Launching Torque Accuracy Tool"
 Set-Location $curDir
 py -3.7 -m pip install -r requirements.txt
-py -3.7 -m streamlit run torque_accuracy_tool.py
+py -3.7 -m streamlit run ../torque_accuracy_tool.py

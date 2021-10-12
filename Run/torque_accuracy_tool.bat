@@ -1,1 +1,0 @@
-py -3.7 -m streamlit run Run/torque_accuracy_tool.py

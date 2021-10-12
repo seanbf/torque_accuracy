@@ -2,7 +2,7 @@
 cls
 :start
 SET ThisScriptsDirectory=%~dp0
-SET PowerShellScriptPath=%ThisScriptsDirectory%/Run/ps_script.ps1
+SET PowerShellScriptPath=%ThisScriptsDirectory%/program/install/ps_script.ps1
 ECHO.
 ECHO ###################################
 ECHO [     Torque Accuracy Install     ]
@@ -32,8 +32,8 @@ goto end
 
 :install_dep
 ECHO Installing Dependancies and Launching Torque Accuracy Tool
-py -3.7 -m pip install -r Run/requirements.txt
-py -3.7 -m streamlit run Run/torque_accuracy_tool.py
+py -3.7 -m pip install -r %ThisScriptsDirectory%\program\install\requirements.txt
+py -3.7 -m streamlit run %ThisScriptsDirectory%\program\torque_accuracy_tool.py
 goto end
 
 :end
