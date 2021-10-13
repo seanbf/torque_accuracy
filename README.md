@@ -15,4 +15,4 @@
 
 ## Running
 
-<br>`torque_accuracy_tool.bat` will apply `py - 3.9 -m streamlit run torque_accuracy_tool.py` command to the cmd terminal which will launch a local server and open up the default web browser as the front-end.
+<br>`torque_accuracy_tool.bat` will apply `py - 3.7 -m streamlit run torque_accuracy_tool.py` command to the cmd terminal which will launch a local server and open up the default web browser as the front-end.
