@@ -2,8 +2,8 @@
 cls
 :start
 SET "ThisScriptsDirectory=%~dp0\\..\\.."
-SET AppName=xPlot
-SET FileName=xplot
+SET AppName=Torque Accuracy Tool
+SET FileName=torque_accuracy_tool
 ECHO.
 ECHO ##### %AppName% Install #####
 ECHO. 
