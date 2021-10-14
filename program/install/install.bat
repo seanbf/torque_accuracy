@@ -36,7 +36,7 @@ ECHO Installing Dependancies and Launching %AppName%
 ECHO Generating Desktop Shortcut and Icon
 set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%-%RANDOM%-%RANDOM%.vbs"
 echo Set oWS = WScript.CreateObject("WScript.Shell") >> %SCRIPT%
-echo sLinkFile = "%USERPROFILE%\Desktop\%FileName%.lnk" >> %SCRIPT%
+echo sLinkFile = "%USERPROFILE%\Desktop\%AppName%.lnk" >> %SCRIPT%
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%
 echo oLink.TargetPath ="%comspec%" >> %SCRIPT%
 echo oLink.Arguments = " /c ""%ThisScriptsDirectory%\program\%AppName%.bat""" >> %SCRIPT%
